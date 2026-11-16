@@ -1,256 +1,183 @@
-<!DOCTYPE html><html lang="en" class="dark" data-tsd-source="/src/routes/__root.tsx:108:5"><head data-tsd-source="/src/routes/__root.tsx:109:7"><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><script>window.__BASE__=location.pathname.replace(/\/[^/]*$/,"")</script><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" data-precedence="default"/><link rel="stylesheet" href="./assets/styles-DQZY-4i9.css" data-precedence="default"/><title>Ahead — Your morning overview</title><meta name="description" content="Stay ahead of team commitments across Northwind Retail and Harbor Health with a clear morning overview and supportive early warnings. Fictional interview prototype."/><meta property="og:title" content="Ahead — Your morning overview"/><meta property="og:description" content="A fictional team-lead workspace for spotting delivery risks before work is late."/><meta property="og:type" content="website"/><meta name="twitter:card" content="summary_large_image"/><link rel="modulepreload" href="./assets/index-CwDrp58w.js"/><link rel="modulepreload" href="./assets/routes-DnHWALoq.js"/>
-<style>
-	#lovable-badge {
-		--badge-bg: #1b1b1b;
-		--badge-text: #c5c1b9;
-		--badge-text-hover: #dcdad5;
-		--badge-radius: 6px;
-		--badge-padding: 8px;
-		--badge-gap: 6px;
-		--badge-shadow: 
-			0 0 0 1px rgba(0, 0, 0, 0.88),
-			0 1px 0 0 rgba(0, 0, 0, 0.04),
-			0 2px 2px -1px rgba(0, 0, 0, 0.08),
-			0 4px 4px -2px rgba(0, 0, 0, 0.08),
-			0 8px 8px -4px rgba(0, 0, 0, 0.08),
-			0 16px 16px -8px rgba(0, 0, 0, 0.08);
-		--badge-transition-duration: 0.2s;
-		--badge-transition-easing: cubic-bezier(0.16, 1, 0.32, 1);
-		--focus-color: #575ECF;
-		--focus-offset: 2px;
-		--focus-width: 2px;
-		
-		position: fixed;
-		bottom: 12px;
-		right: 12px;
-		height: 24px;
-		display: flex;
-		align-items: center;
-		z-index: 1000000;
-		background-color: var(--badge-bg) !important;
-		color: var(--badge-text) !important;
-		border-radius: var(--badge-radius);
-		box-shadow: var(--badge-shadow) !important;
-		font-size: 12px;
-		font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-		font-weight: 400 !important;
-		text-transform: none !important;
-		font-feature-settings: normal !important;
-		transform: translateZ(0);
-		will-change: transform, opacity;
-		transition: opacity var(--badge-transition-duration) var(--badge-transition-easing);
-	}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ahead — Your morning overview</title>
+  <meta name="description" content="A team lead's start-of-day view of commitments that could use support.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="workspace">
 
-	#lovable-badge.closing {
-		opacity: 0;
-		pointer-events: none;
-	}
+    <!-- ============ Left sidebar ============ -->
+    <aside class="sidebar" aria-label="Workspace navigation">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <path d="M5 25 15.5 6 26 25M10 17h12" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="m21 5 6 0 0 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        ahead<span>.</span>
+      </div>
+      <div class="firm-name" data-text="firmName"></div>
 
-	#lovable-badge-cta {
-		display: flex;
-		align-items: baseline;
-		gap: var(--badge-gap);
-		box-sizing: border-box;
-		padding: 4px var(--badge-padding) 0;
-		height: 100%;
-		color: inherit;
-		text-decoration: none;
-		white-space: nowrap;
-		border-radius: var(--badge-radius) 0 0 var(--badge-radius);
-		transition: 
-			background-color var(--badge-transition-duration) ease,
-			color var(--badge-transition-duration) ease,
-			transform 0.1s ease;
-	}
+      <div class="nav-label">Workspace</div>
+      <button class="btn btn-ghost nav-item active" data-nav="morning">
+        <span data-icon="layoutList"></span>Start of day<span class="nav-count" id="nav-at-risk-count"></span>
+      </button>
+      <button class="btn btn-ghost nav-item" data-nav="work">
+        <span data-icon="layoutList"></span>All commitments
+      </button>
+      <button class="btn btn-ghost nav-item" data-nav="team">
+        <span data-icon="users"></span>My team
+      </button>
 
-	#lovable-badge-cta:hover {
-		background: rgba(255, 255, 255, 0.04);
-		color: var(--badge-text-hover);
-	}
+      <div class="nav-label">Engagements</div>
+      <div id="engagement-nav"></div>
 
-	#lovable-badge-cta:active {
-		transform: scale(0.98);
-	}
+      <div class="sidebar-bottom">
+        <div class="environment">
+          <span data-icon="shieldCheck" data-size="15"></span>
+          <span>Runs inside <span data-text="firmName"></span>’s approved environment.</span>
+        </div>
+        <div class="user-profile">
+          <span class="avatar lead" data-text="leadInitials"></span>
+          <div>
+            <div class="profile-name" data-text="leadFullName"></div>
+            <div class="profile-role" data-text="leadRole"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
 
-	#lovable-badge-cta:focus {
-		outline: none;
-	}
+    <!-- ============ Main area ============ -->
+    <main class="main-workspace">
+      <header class="topbar">
+        <div class="topbar-path">
+          <span class="text-muted">Workspace</span>
+          <span data-icon="chevronRight" data-size="12"></span>
+          <span>Start of day</span>
+        </div>
+        <span class="prototype-label">Interview prototype</span>
+      </header>
 
-	#lovable-badge-cta:focus-visible {
-		outline: var(--focus-width) solid var(--focus-color);
-		outline-offset: var(--focus-offset);
-		z-index: 1;
-	}
+      <div class="page-content">
+        <div class="morning-header">
+          <div>
+            <div class="date-line" data-text="today"></div>
+            <h1>Good morning, <span data-text="leadName"></span><span>.</span></h1>
+            <p class="morning-subtitle">
+              Your team’s day, in one place.
+              <strong id="support-sentence"></strong>
+            </p>
+          </div>
+          <div class="capture-status">
+            <span data-icon="checkCheck" data-size="14"></span>Caught up as of <span data-text="caughtUpAt"></span>
+          </div>
+        </div>
 
-	#lovable-badge-text {
-		line-height: 1;
-	}
+        <p class="summary-line" id="summary-line"></p>
 
-	/* The wordmark baseline sits at y=12 of the 16px logo; an empty 12px box
-	   makes that the flex baseline so the text aligns to it on any system font. */
-	#lovable-badge-logo {
-		position: relative;
-		display: block;
-		width: 52px;
-		height: 12px;
-	}
+        <div class="focus-layout">
+          <div>
+            <!-- At-risk cards -->
+            <section aria-labelledby="warning-heading">
+              <div class="section-heading">
+                <h2 class="section-title" id="warning-heading">
+                  <span class="text-warning" data-icon="flag" data-size="16"></span>
+                  A heads-up, before it’s late
+                  <span class="count-label" id="at-risk-count"></span>
+                </h2>
+                <span class="tiny-note">Not overdue</span>
+              </div>
+              <p class="section-description">Small check-ins today can keep these commitments on course.</p>
+              <div class="risk-grid" id="risk-grid"></div>
+            </section>
 
-	#lovable-badge-logo svg {
-		position: absolute;
-		top: 0;
-		left: 0;
-	}
+            <!-- Overdue -->
+            <section class="overdue-section" id="overdue-section" aria-labelledby="overdue-heading">
+              <div class="section-heading">
+                <h2 class="section-title" id="overdue-heading">
+                  <span class="text-destructive" data-icon="clock" data-size="14"></span>
+                  Already overdue
+                  <span class="small-note" id="overdue-count"></span>
+                </h2>
+              </div>
+              <div id="overdue-list"></div>
+            </section>
+          </div>
 
-	#lovable-badge-divider {
-		width: 1px;
-		height: 24px;
-		background-color: rgba(255, 255, 255, 0.04);
-		flex-shrink: 0;
-	}
+          <!-- Team column -->
+          <aside class="team-column" id="team-column" aria-labelledby="team-heading">
+            <div class="section-heading team-heading">
+              <h2 class="section-title" id="team-heading">Your team</h2>
+              <span class="text-muted" data-icon="users" data-size="14"></span>
+            </div>
+            <div id="team-list"></div>
+            <div class="capture-note">
+              <div class="capture-note-title"><span data-icon="fileText" data-size="14"></span>Picked up automatically</div>
+              <p id="capture-sentence"></p>
+              <div class="capture-sources" id="capture-sources"></div>
+            </div>
+          </aside>
+        </div>
 
-	#lovable-badge-close {
-		width: 24px;
-		height: 24px;
-		min-width: 24px;
-		min-height: 24px;
-		cursor: pointer;
-		background: none;
-		border: none;
-		padding: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 0 var(--badge-radius) var(--badge-radius) 0;
-		flex-shrink: 0;
-		transition: 
-			background-color var(--badge-transition-duration) ease,
-			transform 0.1s ease;
-	}
+        <!-- All commitments table -->
+        <section class="all-work" id="all-work" aria-labelledby="all-work-heading">
+          <button class="btn btn-ghost commitments-toggle" id="commitments-toggle" aria-expanded="false" aria-controls="commitments-content"></button>
+          <div id="commitments-content" hidden>
+            <div class="section-heading">
+              <h2 class="section-title" id="all-work-heading">
+                All commitments <span class="small-note" id="table-count"></span>
+              </h2>
+              <div class="filter-bar">
+                <select class="filter-select" id="filter-engagement" aria-label="Filter engagement"></select>
+                <select class="filter-select" id="filter-owner" aria-label="Filter analyst"></select>
+                <select class="filter-select" id="filter-status" aria-label="Filter status">
+                  <option value="all">All statuses</option>
+                  <option value="at-risk">At risk</option>
+                  <option value="on-track">On track</option>
+                  <option value="overdue">Overdue</option>
+                </select>
+                <button class="btn btn-ghost btn-sm" id="filter-reset" hidden>Reset</button>
+              </div>
+            </div>
+            <table class="work-table">
+              <colgroup>
+                <col style="width:34%"><col style="width:13%"><col style="width:13%">
+                <col style="width:14%"><col style="width:23%"><col style="width:3%">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Commitment / engagement</th>
+                  <th>Owner</th>
+                  <th>Due date</th>
+                  <th>Status</th>
+                  <th>Captured from</th>
+                  <th><span class="sr-only">Follow-up</span></th>
+                </tr>
+              </thead>
+              <tbody id="work-table-body"></tbody>
+            </table>
+          </div>
+        </section>
 
-	#lovable-badge-close:hover {
-		background: rgba(255, 255, 255, 0.04);
-	}
+        <footer class="page-footer">
+          <span class="footer-env"><span data-icon="shieldCheck" data-size="12"></span><span data-text="firmName"></span> · Firm-approved environment</span>
+          <span data-text="footerRight"></span>
+        </footer>
+      </div>
+    </main>
+  </div>
 
-	#lovable-badge-close:active {
-		transform: scale(0.92);
-	}
+  <!-- Detail side panel (filled in by app.js when you click a commitment) -->
+  <div class="sheet-overlay" id="sheet-overlay" hidden></div>
+  <div class="detail-sheet" id="detail-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden></div>
 
-	#lovable-badge-close:focus {
-		outline: none;
-	}
-
-	#lovable-badge-close:focus-visible {
-		outline: var(--focus-width) solid var(--focus-color);
-		outline-offset: calc(var(--focus-offset) * -1);
-		z-index: 1;
-	}
-
-	#lovable-badge-close svg path {
-		fill: var(--badge-text);
-		transition: fill var(--badge-transition-duration) ease;
-	}
-
-	#lovable-badge-close:hover svg path {
-		fill: var(--badge-text-hover);
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		#lovable-badge,
-		#lovable-badge-cta,
-		#lovable-badge-close,
-		#lovable-badge-close svg path {
-			transition: none;
-		}
-		
-		#lovable-badge-cta:active,
-		#lovable-badge-close:active {
-			transform: none;
-		}
-	}
-
-	@media (prefers-contrast: high) {
-		#lovable-badge {
-			--badge-bg: #000;
-			--badge-text: #fff;
-			--badge-text-hover: #fff;
-			border: 2px solid currentColor;
-		}
-		
-		#lovable-badge-cta:focus-visible,
-		#lovable-badge-close:focus-visible {
-			outline-width: 3px;
-		}
-	}
-</style>
-<meta name="twitter:title" content="Ahead — Your morning overview"><meta name="twitter:description" content="A fictional team-lead workspace for spotting delivery risks before work is late."><meta property="og:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/lovp_4q65qk09gd8nabr3cjjndfvsyk/f2f26c213dd89bd44301e28360512c0e_1794788427689.png"><meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/lovp_4q65qk09gd8nabr3cjjndfvsyk/f2f26c213dd89bd44301e28360512c0e_1794788427689.png"></head><body data-tsd-source="/src/routes/__root.tsx:112:7"><!--$--><div class="workspace" data-tsd-source="/src/routes/index.tsx:51:10"><aside class="sidebar" aria-label="Workspace navigation" data-tsd-source="/src/routes/index.tsx:52:5"><div class="brand" data-tsd-source="/src/routes/index.tsx:53:7"><svg class="brand-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:53:30"><path d="M5 25 15.5 6 26 25M10 17h12" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" data-tsd-source="/src/routes/index.tsx:53:109"></path><path d="m21 5 6 0 0 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" data-tsd-source="/src/routes/index.tsx:53:234"></path></svg>ahead<span data-tsd-source="/src/routes/index.tsx:53:333">.</span></div><div class="firm-name" data-tsd-source="/src/routes/index.tsx:54:7">Linden Advisory</div><div class="nav-label" data-tsd-source="/src/routes/index.tsx:55:7">Workspace</div><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 nav-item active" data-tsd-source="/src/routes/index.tsx:56:7"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-list" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:56:179"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect><path d="M14 4h7"></path><path d="M14 9h7"></path><path d="M14 15h7"></path><path d="M14 20h7"></path></svg>Start of day<span class="nav-count" data-tsd-source="/src/routes/index.tsx:56:205">4</span></button><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 nav-item" data-tsd-source="/src/routes/index.tsx:57:7"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-list" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:57:115"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect><path d="M14 4h7"></path><path d="M14 9h7"></path><path d="M14 15h7"></path><path d="M14 20h7"></path></svg>All commitments</button><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 nav-item" data-tsd-source="/src/routes/index.tsx:58:7"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:58:198"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><path d="M16 3.128a4 4 0 0 1 0 7.744"></path><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><circle cx="9" cy="7" r="4"></circle></svg>My team</button><div class="nav-label" data-tsd-source="/src/routes/index.tsx:59:7">Engagements</div><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 nav-item" data-tsd-source="/src/routes/index.tsx:60:7"><span class="engagement-dot" data-tsd-source="/src/routes/index.tsx:60:145"></span>Northwind Retail</button><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 nav-item" data-tsd-source="/src/routes/index.tsx:61:7"><span class="engagement-dot harbor" data-tsd-source="/src/routes/index.tsx:61:139"></span>Harbor Health</button><div class="sidebar-bottom" data-tsd-source="/src/routes/index.tsx:62:7"><div class="environment" data-tsd-source="/src/routes/index.tsx:63:9"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:63:38"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg><span data-tsd-source="/src/routes/index.tsx:63:63">Runs inside Linden Advisory’s approved environment.</span></div><div class="user-profile" data-tsd-source="/src/routes/index.tsx:64:9"><span class="avatar lead" data-tsd-source="/src/routes/index.tsx:64:39">AL</span><div data-tsd-source="/src/routes/index.tsx:64:78"><div class="profile-name" data-tsd-source="/src/routes/index.tsx:64:83">Alex Lee</div><div class="profile-role" data-tsd-source="/src/routes/index.tsx:64:127">Team lead · Advisory</div></div></div></div></aside><main class="main-workspace" data-tsd-source="/src/routes/index.tsx:67:5"><header class="topbar" data-tsd-source="/src/routes/index.tsx:68:7"><div class="topbar-path" data-tsd-source="/src/routes/index.tsx:68:34"><span class="text-muted-foreground" data-tsd-source="/src/routes/index.tsx:68:63">Workspace</span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:68:119"><path d="m9 18 6-6-6-6"></path></svg><span data-tsd-source="/src/routes/index.tsx:68:145">Start of day</span></div><span class="prototype-label" data-tsd-source="/src/routes/index.tsx:68:176">Interview prototype</span></header><div class="page-content" data-tsd-source="/src/routes/index.tsx:69:7"><div class="morning-header" data-tsd-source="/src/routes/index.tsx:70:9"><div data-tsd-source="/src/routes/index.tsx:70:41"><div class="date-line" data-tsd-source="/src/routes/index.tsx:70:46">Monday, 16 November 2026</div><h1 data-tsd-source="/src/routes/index.tsx:70:94">Good morning, Alex<span data-tsd-source="/src/routes/index.tsx:70:116">.</span></h1><p class="morning-subtitle" data-tsd-source="/src/routes/index.tsx:70:135">Your team’s day, in one place. <strong data-tsd-source="/src/routes/index.tsx:70:198">Four commitments could use a little support.</strong></p></div><div class="capture-status" data-tsd-source="/src/routes/index.tsx:70:269"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-check" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:70:301"><path d="M18 6 7 17l-5-5"></path><path d="m22 10-7.5 7.5L13 16"></path></svg>Caught up as of 8:30 am</div></div><p class="summary-line" data-tsd-source="/src/routes/index.tsx:71:9"><span class="text-warning" data-tsd-source="/src/routes/index.tsx:71:37">4 at risk</span> · <span class="text-destructive" data-tsd-source="/src/routes/index.tsx:71:87">1 overdue</span> · <span class="text-success" data-tsd-source="/src/routes/index.tsx:71:141">7 on track</span> across 2 engagements</p><div class="focus-layout" data-tsd-source="/src/routes/index.tsx:72:9"><div data-tsd-source="/src/routes/index.tsx:73:11"><section aria-labelledby="warning-heading" data-tsd-source="/src/routes/index.tsx:74:13"><div class="section-heading" data-tsd-source="/src/routes/index.tsx:75:15"><h2 class="section-title" id="warning-heading" data-tsd-source="/src/routes/index.tsx:75:48"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flag text-warning" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:75:99"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"></path></svg>A heads-up, before it’s late<span class="count-label" data-tsd-source="/src/routes/index.tsx:75:170">4</span></h2><span class="text-[9px] text-muted-foreground" data-tsd-source="/src/routes/index.tsx:75:213">Not overdue</span></div><p class="section-description" data-tsd-source="/src/routes/index.tsx:76:15">Small check-ins today can keep these commitments on course.</p><div class="risk-grid" data-tsd-source="/src/routes/index.tsx:77:15"><article class="risk-card " data-tsd-source="/src/routes/index.tsx:77:61"><div class="risk-top" data-tsd-source="/src/routes/index.tsx:78:17"><span class="engagement-tag" data-tsd-source="/src/routes/index.tsx:78:43"><span class="engagement-dot " data-tsd-source="/src/routes/index.tsx:78:76"></span>Northwind Retail</span><span class="status-badge at-risk" data-tsd-source="/src/routes/index.tsx:32:10"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flag" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:32:53"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"></path></svg>At risk</span></div><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 underline-offset-4 hover:underline h-9 px-4 py-2 item-title-button text-foreground" data-tsd-source="/src/routes/index.tsx:79:17">Finance process mapping</button><div class="risk-owner" data-tsd-source="/src/routes/index.tsx:80:17"><span class="avatar " data-tsd-source="/src/routes/index.tsx:29:57">PS</span><span data-tsd-source="/src/routes/index.tsx:80:74">Priya</span><span class="due-text" data-tsd-source="/src/routes/index.tsx:80:99">Due in 8 days</span></div><p class="risk-reason" data-tsd-source="/src/routes/index.tsx:81:17">No progress update in 3 days, with the draft due in 8 days.</p><div class="risk-notice" data-tsd-source="/src/routes/index.tsx:82:17"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock3 lucide-clock-3" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:82:46"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6h4"></path></svg>At risk since <!-- -->today<!-- --> · Due <!-- -->Tue, 24 Nov</div><div class="risk-next" data-tsd-source="/src/routes/index.tsx:83:17"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:83:44"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg><span data-tsd-source="/src/routes/index.tsx:83:68">Check in with Priya about the draft and any blockers.</span></div><div class="risk-footer" data-tsd-source="/src/routes/index.tsx:84:17"><span class="source-mini" data-tsd-source="/src/routes/index.tsx:84:46"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-video" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:27:10"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"></path><rect x="2" y="6" width="14" height="12" rx="2"></rect></svg>from <!-- -->Thu team check-in</span><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 followup-button" aria-label="Mark follow-up planned for Finance process mapping" data-tsd-source="/src/routes/index.tsx:84:138">Plan follow-up<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-right" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:84:451"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg></button></div></article><article class="risk-card " data-tsd-source="/src/routes/index.tsx:77:61"><div class="risk-top" data-tsd-source="/src/routes/index.tsx:78:17"><span class="engagement-tag" data-tsd-source="/src/routes/index.tsx:78:43"><span class="engagement-dot harbor" data-tsd-source="/src/routes/index.tsx:78:76"></span>Harbor Health</span><span class="status-badge at-risk" data-tsd-source="/src/routes/index.tsx:32:10"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flag" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:32:53"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"></path></svg>At risk</span></div><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 underline-offset-4 hover:underline h-9 px-4 py-2 item-title-button text-foreground" data-tsd-source="/src/routes/index.tsx:79:17">Controls evidence pack</button><div class="risk-owner" data-tsd-source="/src/routes/index.tsx:80:17"><span class="avatar marcus" data-tsd-source="/src/routes/index.tsx:29:57">MC</span><span data-tsd-source="/src/routes/index.tsx:80:74">Marcus</span><span class="due-text" data-tsd-source="/src/routes/index.tsx:80:99">Due in 3 days</span></div><p class="risk-reason" data-tsd-source="/src/routes/index.tsx:81:17">Marcus has 5 deliverables across both engagements this week; two are due Thursday.</p><div class="risk-notice" data-tsd-source="/src/routes/index.tsx:82:17"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock3 lucide-clock-3" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:82:46"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6h4"></path></svg>At risk since <!-- -->Friday<!-- --> · Due <!-- -->Thu, 19 Nov</div><div class="risk-next" data-tsd-source="/src/routes/index.tsx:83:17"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:83:44"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg><span data-tsd-source="/src/routes/index.tsx:83:68">Check with Marcus which work can be reprioritized.</span></div><div class="risk-footer" data-tsd-source="/src/routes/index.tsx:84:17"><span class="source-mini" data-tsd-source="/src/routes/index.tsx:84:46"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:27:10"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"></path></svg>from <!-- -->Fri resourcing chat</span><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 followup-button" aria-label="Mark follow-up planned for Controls evidence pack" data-tsd-source="/src/routes/index.tsx:84:138">Plan follow-up<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-right" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:84:451"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg></button></div></article><article class="risk-card " data-tsd-source="/src/routes/index.tsx:77:61"><div class="risk-top" data-tsd-source="/src/routes/index.tsx:78:17"><span class="engagement-tag" data-tsd-source="/src/routes/index.tsx:78:43"><span class="engagement-dot " data-tsd-source="/src/routes/index.tsx:78:76"></span>Northwind Retail</span><span class="status-badge at-risk" data-tsd-source="/src/routes/index.tsx:32:10"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flag" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:32:53"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"></path></svg>At risk</span></div><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 underline-offset-4 hover:underline h-9 px-4 py-2 item-title-button text-foreground" data-tsd-source="/src/routes/index.tsx:79:17">Revenue reconciliation</button><div class="risk-owner" data-tsd-source="/src/routes/index.tsx:80:17"><span class="avatar marcus" data-tsd-source="/src/routes/index.tsx:29:57">MC</span><span data-tsd-source="/src/routes/index.tsx:80:74">Marcus</span><span class="due-text" data-tsd-source="/src/routes/index.tsx:80:99">Due tomorrow</span></div><p class="risk-reason" data-tsd-source="/src/routes/index.tsx:81:17">The client’s sales export was expected Friday and hasn’t arrived.</p><div class="risk-notice" data-tsd-source="/src/routes/index.tsx:82:17"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock3 lucide-clock-3" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:82:46"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6h4"></path></svg>At risk since <!-- -->this morning<!-- --> · Due <!-- -->Tue, 17 Nov</div><div class="risk-next" data-tsd-source="/src/routes/index.tsx:83:17"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:83:44"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg><span data-tsd-source="/src/routes/index.tsx:83:68">Ask the client for the missing sales export today.</span></div><div class="risk-footer" data-tsd-source="/src/routes/index.tsx:84:17"><span class="source-mini" data-tsd-source="/src/routes/index.tsx:84:46"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:27:10"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path><rect x="2" y="4" width="20" height="16" rx="2"></rect></svg>from <!-- -->Fri client email</span><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 followup-button" aria-label="Mark follow-up planned for Revenue reconciliation" data-tsd-source="/src/routes/index.tsx:84:138">Plan follow-up<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-right" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:84:451"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg></button></div></article><article class="risk-card " data-tsd-source="/src/routes/index.tsx:77:61"><div class="risk-top" data-tsd-source="/src/routes/index.tsx:78:17"><span class="engagement-tag" data-tsd-source="/src/routes/index.tsx:78:43"><span class="engagement-dot harbor" data-tsd-source="/src/routes/index.tsx:78:76"></span>Harbor Health</span><span class="status-badge at-risk" data-tsd-source="/src/routes/index.tsx:32:10"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flag" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:32:53"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528"></path></svg>At risk</span></div><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 underline-offset-4 hover:underline h-9 px-4 py-2 item-title-button text-foreground" data-tsd-source="/src/routes/index.tsx:79:17">Audit readiness assessment</button><div class="risk-owner" data-tsd-source="/src/routes/index.tsx:80:17"><span class="avatar " data-tsd-source="/src/routes/index.tsx:29:57">PS</span><span data-tsd-source="/src/routes/index.tsx:80:74">Priya</span><span class="due-text" data-tsd-source="/src/routes/index.tsx:80:99">Due in 2 days</span></div><p class="risk-reason" data-tsd-source="/src/routes/index.tsx:81:17">The manager review is tomorrow, one day before Priya’s draft is due.</p><div class="risk-notice" data-tsd-source="/src/routes/index.tsx:82:17"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock3 lucide-clock-3" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:82:46"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6h4"></path></svg>At risk since <!-- -->yesterday<!-- --> · Due <!-- -->Wed, 18 Nov</div><div class="risk-next" data-tsd-source="/src/routes/index.tsx:83:17"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:83:44"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg><span data-tsd-source="/src/routes/index.tsx:83:68">Agree an earlier review-ready outline with Priya.</span></div><div class="risk-footer" data-tsd-source="/src/routes/index.tsx:84:17"><span class="source-mini" data-tsd-source="/src/routes/index.tsx:84:46"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-video" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:27:10"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"></path><rect x="2" y="6" width="14" height="12" rx="2"></rect></svg>from <!-- -->Thu planning call</span><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 followup-button" aria-label="Mark follow-up planned for Audit readiness assessment" data-tsd-source="/src/routes/index.tsx:84:138">Plan follow-up<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-right" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:84:451"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg></button></div></article></div></section><section class="overdue-section" aria-labelledby="overdue-heading" data-tsd-source="/src/routes/index.tsx:87:25"><div class="section-heading" data-tsd-source="/src/routes/index.tsx:87:96"><h2 class="section-title" id="overdue-heading" data-tsd-source="/src/routes/index.tsx:87:129"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock3 lucide-clock-3 text-destructive" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:87:180"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6h4"></path></svg>Already overdue<span class="text-[10px] text-muted-foreground font-normal" data-tsd-source="/src/routes/index.tsx:87:244">1 commitment</span></h2></div><div class="overdue-row" data-tsd-source="/src/routes/index.tsx:87:338"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:87:367"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg><div class="overdue-main" data-tsd-source="/src/routes/index.tsx:87:392"><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 underline-offset-4 hover:underline h-9 px-4 py-2 item-title-button text-foreground" data-tsd-source="/src/routes/index.tsx:87:422">Request list for missing evidence</button><div class="overdue-sub" data-tsd-source="/src/routes/index.tsx:87:552">Priya<!-- --> · <!-- -->Harbor Health<!-- --> · from <!-- -->Tue client call</div></div><span class="status-badge overdue" data-tsd-source="/src/routes/index.tsx:87:655">3 days overdue</span><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9" aria-label="Open overdue commitment" data-tsd-source="/src/routes/index.tsx:87:715"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:87:825"><path d="m9 18 6-6-6-6"></path></svg></button></div></section></div><aside class="team-column" aria-labelledby="team-heading" data-tsd-source="/src/routes/index.tsx:89:11"><div class="section-heading team-heading" data-tsd-source="/src/routes/index.tsx:90:13"><h2 class="section-title" id="team-heading" data-tsd-source="/src/routes/index.tsx:90:59">Your team</h2><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users text-muted-foreground" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:90:121"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><path d="M16 3.128a4 4 0 0 1 0 7.744"></path><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><circle cx="9" cy="7" r="4"></circle></svg></div><div class="analyst-block" data-tsd-source="/src/routes/index.tsx:94:22"><div class="analyst-header" data-tsd-source="/src/routes/index.tsx:94:67"><span class="avatar " data-tsd-source="/src/routes/index.tsx:29:57">PS</span><div data-tsd-source="/src/routes/index.tsx:94:125"><div class="analyst-name" data-tsd-source="/src/routes/index.tsx:94:130">Priya Shah</div><div class="analyst-meta" data-tsd-source="/src/routes/index.tsx:94:218">Analyst · <!-- -->7<!-- --> commitments</div></div></div><div class="team-project" data-tsd-source="/src/routes/index.tsx:97:26"><div class="team-project-name" data-tsd-source="/src/routes/index.tsx:97:70"><span data-tsd-source="/src/routes/index.tsx:97:105">Northwind Retail</span></div><div class="workload-line" data-tsd-source="/src/routes/index.tsx:97:133"><div class="workload-bar" data-tsd-source="/src/routes/index.tsx:97:164"><span class="workload-segment at-risk" title="Finance process mapping: At risk" data-tsd-source="/src/routes/index.tsx:97:220"></span><span class="workload-segment on-track" title="Stakeholder interview summary: On track" data-tsd-source="/src/routes/index.tsx:97:220"></span><span class="workload-segment on-track" title="Transformation workshop agenda: On track" data-tsd-source="/src/routes/index.tsx:97:220"></span><span class="workload-segment on-track" title="Finance systems inventory: On track" data-tsd-source="/src/routes/index.tsx:97:220"></span></div><span class="workload-count" data-tsd-source="/src/routes/index.tsx:97:349">4</span></div><div class="team-status-counts" data-tsd-source="/src/routes/index.tsx:97:416"><span class="text-success" data-tsd-source="/src/routes/index.tsx:97:601">3<!-- --> <!-- -->on track</span><span class="text-warning" data-tsd-source="/src/routes/index.tsx:97:601">1<!-- --> <!-- -->at risk</span></div></div><div class="team-project" data-tsd-source="/src/routes/index.tsx:97:26"><div class="team-project-name" data-tsd-source="/src/routes/index.tsx:97:70"><span data-tsd-source="/src/routes/index.tsx:97:105">Harbor Health</span></div><div class="workload-line" data-tsd-source="/src/routes/index.tsx:97:133"><div class="workload-bar" data-tsd-source="/src/routes/index.tsx:97:164"><span class="workload-segment at-risk" title="Audit readiness assessment: At risk" data-tsd-source="/src/routes/index.tsx:97:220"></span><span class="workload-segment overdue" title="Request list for missing evidence: Overdue" data-tsd-source="/src/routes/index.tsx:97:220"></span><span class="workload-segment on-track" title="Readiness workshop notes: On track" data-tsd-source="/src/routes/index.tsx:97:220"></span></div><span class="workload-count" data-tsd-source="/src/routes/index.tsx:97:349">3</span></div><div class="team-status-counts" data-tsd-source="/src/routes/index.tsx:97:416"><span class="text-success" data-tsd-source="/src/routes/index.tsx:97:601">1<!-- --> <!-- -->on track</span><span class="text-warning" data-tsd-source="/src/routes/index.tsx:97:601">1<!-- --> <!-- -->at risk</span><span class="text-destructive" data-tsd-source="/src/routes/index.tsx:97:601">1<!-- --> <!-- -->overdue</span></div></div><div class="team-note" data-tsd-source="/src/routes/index.tsx:98:20"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock3 lucide-clock-3" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:98:99"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6h4"></path></svg><span data-tsd-source="/src/routes/index.tsx:98:120">3<!-- --> deliverables due this week<!-- -->. A quick check-in could help.</span></div></div><div class="analyst-block" data-tsd-source="/src/routes/index.tsx:94:22"><div class="analyst-header" data-tsd-source="/src/routes/index.tsx:94:67"><span class="avatar marcus" data-tsd-source="/src/routes/index.tsx:29:57">MC</span><div data-tsd-source="/src/routes/index.tsx:94:125"><div class="analyst-name" data-tsd-source="/src/routes/index.tsx:94:130">Marcus Chen</div><div class="analyst-meta" data-tsd-source="/src/routes/index.tsx:94:218">Analyst · <!-- -->5<!-- --> commitments</div></div></div><div class="team-project" data-tsd-source="/src/routes/index.tsx:97:26"><div class="team-project-name" data-tsd-source="/src/routes/index.tsx:97:70"><span data-tsd-source="/src/routes/index.tsx:97:105">Northwind Retail</span></div><div class="workload-line" data-tsd-source="/src/routes/index.tsx:97:133"><div class="workload-bar" data-tsd-source="/src/routes/index.tsx:97:164"><span class="workload-segment at-risk" title="Revenue reconciliation: At risk" data-tsd-source="/src/routes/index.tsx:97:220"></span><span class="workload-segment on-track" title="Month-end close baseline: On track" data-tsd-source="/src/routes/index.tsx:97:220"></span></div><span class="workload-count" data-tsd-source="/src/routes/index.tsx:97:349">2</span></div><div class="team-status-counts" data-tsd-source="/src/routes/index.tsx:97:416"><span class="text-success" data-tsd-source="/src/routes/index.tsx:97:601">1<!-- --> <!-- -->on track</span><span class="text-warning" data-tsd-source="/src/routes/index.tsx:97:601">1<!-- --> <!-- -->at risk</span></div></div><div class="team-project" data-tsd-source="/src/routes/index.tsx:97:26"><div class="team-project-name" data-tsd-source="/src/routes/index.tsx:97:70"><span data-tsd-source="/src/routes/index.tsx:97:105">Harbor Health</span></div><div class="workload-line" data-tsd-source="/src/routes/index.tsx:97:133"><div class="workload-bar" data-tsd-source="/src/routes/index.tsx:97:164"><span class="workload-segment at-risk" title="Controls evidence pack: At risk" data-tsd-source="/src/routes/index.tsx:97:220"></span><span class="workload-segment on-track" title="Control owner matrix: On track" data-tsd-source="/src/routes/index.tsx:97:220"></span><span class="workload-segment on-track" title="Sample testing tracker: On track" data-tsd-source="/src/routes/index.tsx:97:220"></span></div><span class="workload-count" data-tsd-source="/src/routes/index.tsx:97:349">3</span></div><div class="team-status-counts" data-tsd-source="/src/routes/index.tsx:97:416"><span class="text-success" data-tsd-source="/src/routes/index.tsx:97:601">2<!-- --> <!-- -->on track</span><span class="text-warning" data-tsd-source="/src/routes/index.tsx:97:601">1<!-- --> <!-- -->at risk</span></div></div><div class="team-note" data-tsd-source="/src/routes/index.tsx:98:20"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:98:71"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg><span data-tsd-source="/src/routes/index.tsx:98:120">5<!-- --> deliverables due this week<!-- --> — worth a priorities check-in.</span></div></div><div class="capture-note" data-tsd-source="/src/routes/index.tsx:101:13"><div class="capture-note-title" data-tsd-source="/src/routes/index.tsx:101:43"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:101:79"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>Picked up automatically</div><p data-tsd-source="/src/routes/index.tsx:101:130">12 commitments from your team’s meetings, emails and chats.</p><div class="capture-sources" data-tsd-source="/src/routes/index.tsx:101:196"><span data-tsd-source="/src/routes/index.tsx:101:229"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-video" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:101:235"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"></path><rect x="2" y="6" width="14" height="12" rx="2"></rect></svg>6</span><span data-tsd-source="/src/routes/index.tsx:101:262"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:101:268"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path><rect x="2" y="4" width="20" height="16" rx="2"></rect></svg>3</span><span data-tsd-source="/src/routes/index.tsx:101:294"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:101:300"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"></path></svg>3</span></div></div></aside></div><section class="all-work" aria-labelledby="all-work-heading" data-tsd-source="/src/routes/index.tsx:104:9"><button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 commitments-toggle" aria-expanded="false" aria-controls="commitments-content" data-tsd-source="/src/routes/index.tsx:105:11"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:105:178"><path d="m6 9 6 6 6-6"></path></svg>Show all 12 commitments</button></section><footer class="page-footer" data-tsd-source="/src/routes/index.tsx:111:9"><span class="flex items-center gap-1.5" data-tsd-source="/src/routes/index.tsx:111:41"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check" aria-hidden="true" data-tsd-source="/src/routes/index.tsx:111:85"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>Linden Advisory · Firm-approved environment</span><span data-tsd-source="/src/routes/index.tsx:111:160">Sample scenario · Monday, 16 November</span></footer></div></main></div><script>(function(a,f){let l;try{l=JSON.parse(sessionStorage.getItem(a)||"{}")}catch{return}const n=l?.[f||history.state?.__TSR_key];let c=!1;for(const t in n){const e=n[t],o=e?.scrollX,s=e?.scrollY;if(Number.isFinite(o)&&Number.isFinite(s)){if(t==="window")scrollTo(o,s),c=!0;else if(t)try{const r=document.querySelector(t);r&&(r.scrollLeft=o,r.scrollTop=s)}catch{}}}if(c)return;const i=location.hash.slice(1);if(i){const t=history.state?.__hashScrollIntoViewOptions??!0;if(t){const e=document.getElementById(i);e&&e.scrollIntoView(t)}return}scrollTo(0,0)})("tsr-scroll-restoration-v1_3");document.currentScript.remove()</script><!--/$--><script data-tsr-stream-part="">(self.$R=self.$R||{})["tsr"]=[];self.$_TSR={h(){this.hydrated=!0,this.c()},e(){this.streamEnded=!0,this.c()},c(){this.hydrated&&this.streamEnded&&(delete self.$_TSR,delete self.$R.tsr)},p(e){this.initialized?e():this.buffer.push(e)},buffer:[]};$_TSR.router=($R=>$R[0]={manifest:$R[1]={routes:$R[2]={__root__:$R[3]={preloads:$R[4]=["./assets/index-CwDrp58w.js"],scripts:$R[5]=[$R[6]={attrs:$R[7]={type:"module",async:!0,src:"./assets/index-CwDrp58w.js"}}]},"/":$R[8]={preloads:$R[9]=["./assets/routes-DnHWALoq.js"]}}},matches:$R[10]=[$R[11]={i:"__root__ ",u:1794853850074,s:"success",ssr:!0},$R[12]={i:"  ",u:1794853850074,s:"success",ssr:!0}]})($R["tsr"]);$_TSR.e();{let s=document.currentScript,p;while((p=s.previousElementSibling)&&p.hasAttribute('data-tsr-stream-part'))p.remove();s.remove()}</script><script type="module" async="" src="./assets/index-CwDrp58w.js"></script><script>document.currentScript.remove();/*$tsr-stream-boundary*/</script>
-<aside
-	id="lovable-badge"
-	role="complementary"
-	dir="ltr"
-	lang="en"
-	aria-label="Edit with Lovable">
-	<a
-		id="lovable-badge-cta" 
-		target="_blank" 
-		href="https://lovable.dev/projects/lovp_4q65qk09gd8nabr3cjjndfvsyk?utm_source=lovable-badge"
-		rel="noopener nofollow"
-		aria-label="Edit with Lovable">
-		<span id="lovable-badge-text">Edit with</span>
-		<span id="lovable-badge-logo"><svg xmlns="http://www.w3.org/2000/svg" width="52" height="16" fill="none" viewBox="0 0 52 16">
-  <path fill="#FCFBF8" fill-rule="evenodd" d="M20.318 5.25c.643 0 1.206.14 1.69.418a2.81 2.81 0 0 1 1.118 1.191c.266.513.4 1.115.4 1.807s-.134 1.296-.4 1.812a2.81 2.81 0 0 1-1.118 1.193c-.484.278-1.047.418-1.69.418s-1.208-.14-1.695-.418a2.85 2.85 0 0 1-1.125-1.193c-.262-.516-.393-1.12-.393-1.812s.131-1.294.393-1.807a2.848 2.848 0 0 1 1.125-1.191c.487-.279 1.052-.418 1.695-.418Zm0 1.425c-.27 0-.504.076-.7.228-.193.147-.34.37-.443.67-.102.295-.153.66-.153 1.093 0 .435.05.801.153 1.1.102.3.25.524.443.676.196.147.43.22.7.22.27 0 .502-.073.694-.22.193-.152.341-.375.443-.67.103-.299.153-.667.153-1.106 0-.65-.112-1.145-.337-1.481a1.08 1.08 0 0 0-.953-.51ZM32.7 5.25c.61 0 1.127.1 1.549.3.422.197.74.48.953.849.217.368.325.809.325 1.32v2.704c0 .29.02.562.062.812.044.245.108.4.19.466V12h-1.935a5.895 5.895 0 0 1-.105-.684 7.745 7.745 0 0 1-.02-.228 2.293 2.293 0 0 1-.151.203c-.205.242-.47.437-.793.584-.32.143-.685.215-1.094.215-.406 0-.77-.08-1.094-.24a1.845 1.845 0 0 1-.756-.682 1.984 1.984 0 0 1-.27-1.045c0-.606.178-1.069.535-1.388.356-.324.87-.534 1.542-.633l1.125-.16c.225-.032.403-.074.534-.123a.622.622 0 0 0 .288-.196.549.549 0 0 0 .093-.327.65.65 0 0 0-.11-.367.702.702 0 0 0-.32-.27c-.14-.07-.31-.105-.51-.105-.32 0-.576.083-.768.251-.193.164-.298.39-.314.676h-1.923c.016-.434.147-.82.393-1.155.25-.34.596-.604 1.039-.792.442-.189.954-.283 1.535-.283Zm.99 3.498a.98.98 0 0 1-.215.14 2.49 2.49 0 0 1-.584.178l-.473.092c-.315.061-.553.156-.713.283-.155.127-.233.305-.233.534 0 .23.084.412.252.547.168.135.383.203.645.203s.494-.058.694-.173c.201-.118.355-.282.461-.49.11-.21.166-.448.166-.714v-.6Zm4.526-2.375c.065-.125.138-.243.221-.349.197-.25.437-.44.719-.571.282-.135.6-.203.952-.203.528 0 .988.138 1.377.412.389.275.688.67.896 1.186.21.512.314 1.12.314 1.824 0 .7-.107 1.309-.32 1.825-.213.512-.518.906-.915 1.18-.393.275-.854.412-1.383.412-.352 0-.667-.062-.946-.184a1.832 1.832 0 0 1-.7-.554 2.2 2.2 0 0 1-.234-.383V12h-1.843V3h1.862v3.373Zm1.284.296c-.274 0-.51.085-.707.253-.192.163-.338.397-.436.7a3.376 3.376 0 0 0-.148 1.05c0 .406.05.759.148 1.058.098.299.243.53.436.694.197.164.433.246.707.246.279 0 .512-.082.7-.246.193-.164.336-.395.43-.694.099-.3.148-.652.148-1.058 0-.405-.05-.757-.147-1.056-.095-.299-.238-.53-.43-.694a1.015 1.015 0 0 0-.7-.253Zm9.416-1.419c.602 0 1.136.131 1.604.393.466.262.829.643 1.086 1.143.263.5.394 1.097.394 1.794 0 .25-.002.449-.006.596H47.51c.018.288.071.538.164.75a1.3 1.3 0 0 0 .491.596c.214.13.465.196.757.196.319 0 .583-.082.792-.246.209-.167.34-.403.393-.706h1.862a2.48 2.48 0 0 1-.485 1.235 2.54 2.54 0 0 1-1.051.805c-.439.188-.949.283-1.53.283-.655 0-1.225-.125-1.708-.375a2.672 2.672 0 0 1-1.13-1.143c-.267-.508-.4-1.137-.4-1.887 0-.712.14-1.327.418-1.843a2.86 2.86 0 0 1 1.155-1.186c.491-.27 1.051-.405 1.678-.405Zm-.044 1.345c-.274 0-.516.068-.725.203a1.29 1.29 0 0 0-.479.59 2.045 2.045 0 0 0-.132.498h2.562a1.873 1.873 0 0 0-.138-.602 1.061 1.061 0 0 0-.418-.516 1.243 1.243 0 0 0-.67-.173Z" clip-rule="evenodd"/>
-  <path fill="#FCFBF8" d="m26.605 9.995 1.342-4.566h1.924L27.628 12h-2.07l-2.33-6.57h1.98l1.397 4.565Zm-13.013.143h2.256c1.632 0 1.421 1.837 1.418 1.861h-5.603V3h1.93v7.138Zm31.516 1.861h-1.862V3h1.862v8.999Z"/>
-  <path fill="url(#a)" fill-rule="evenodd" d="M2.7 3c1.492 0 2.7 1.192 2.7 2.663v1.012h.9c1.49 0 2.7 1.192 2.7 2.662S7.791 12 6.3 12H0V5.663C0 4.193 1.209 3 2.7 3Z" clip-rule="evenodd"/>
-  <defs>
-    <radialGradient id="a" cx="0" cy="0" r="1" gradientTransform="matrix(-1.54236 7.07838 -10.231 -2.15602 4.627 5.022)" gradientUnits="userSpaceOnUse">
-      <stop offset=".106" stop-color="#FE7B02"/>
-      <stop offset=".394" stop-color="#FE3F21"/>
-      <stop offset=".608" stop-color="#F858BC"/>
-      <stop offset=".929" stop-color="#575ECF"/>
-    </radialGradient>
-  </defs>
-</svg>
-
-</span>
-	</a>
-	
-	<span id="lovable-badge-divider" aria-hidden="true"></span>
-	
-	<button 
-		id="lovable-badge-close"
-		aria-label="Dismiss"
-		title="Dismiss"
-		type="button">
-		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16" aria-hidden="true">
-			<path d="M10.646 4.646a.5.5 0 1 1 .707.708L8.707 8l2.646 2.646a.5.5 0 1 1-.707.707L8 8.707l-2.646 2.646a.5.5 0 1 1-.708-.707L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708L8 7.293l2.646-2.647Z"/>
-		</svg>
-	</button>
-</aside>
-<script>
-	(() => {
-		if (window.self !== window.top || navigator.userAgent.includes('puppeteer')) {
-			const badge = document.querySelector('#lovable-badge');
-			if (badge) {
-				badge.style.display = 'none';
-			}
-			return;
-		}
-
-		const closeButton = document.querySelector('#lovable-badge-close');
-		if (closeButton) {
-			closeButton.addEventListener('click', function(event) {
-				event.preventDefault();
-				event.stopPropagation();
-				const badge = document.querySelector('#lovable-badge');
-				if (badge) {
-					badge.classList.add('closing');
-					setTimeout(function() {
-						if (badge) {
-							badge.style.display = 'none';
-						}
-					}, 240);
-				}
-			});
-		}
-	})();
-</script>
-</body></html>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
