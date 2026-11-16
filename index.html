@@ -7,157 +7,91 @@
   <meta name="description" content="A team lead's start-of-day view of commitments that could use support.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="workspace">
+  <div class="app">
 
-    <!-- ============ Left sidebar ============ -->
-    <aside class="sidebar" aria-label="Workspace navigation">
+    <!-- ============ Sidebar ============ -->
+    <aside class="sidebar" aria-label="Navigation">
       <div class="brand">
-        <svg class="brand-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
           <path d="M5 25 15.5 6 26 25M10 17h12" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="m21 5 6 0 0 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
         </svg>
-        ahead<span>.</span>
+        ahead
       </div>
-      <div class="firm-name" data-text="firmName"></div>
+      <div class="firm-name meta" data-text="firmName"></div>
 
-      <div class="nav-label">Workspace</div>
-      <button class="btn btn-ghost nav-item active" data-nav="morning">
-        <span data-icon="layoutList"></span>Start of day<span class="nav-count" id="nav-at-risk-count"></span>
-      </button>
-      <button class="btn btn-ghost nav-item" data-nav="work">
-        <span data-icon="layoutList"></span>All commitments
-      </button>
-      <button class="btn btn-ghost nav-item" data-nav="team">
-        <span data-icon="users"></span>My team
-      </button>
+      <button class="nav-item active" data-nav="today"><span data-icon="sun"></span>Today</button>
+      <button class="nav-item" data-nav="work"><span data-icon="list"></span>All commitments</button>
+      <button class="nav-item" data-nav="team"><span data-icon="users"></span>Team</button>
 
-      <div class="nav-label">Engagements</div>
+      <div class="nav-group-label">Engagements</div>
       <div id="engagement-nav"></div>
 
-      <div class="sidebar-bottom">
-        <div class="environment">
-          <span data-icon="shieldCheck" data-size="15"></span>
-          <span>Runs inside <span data-text="firmName"></span>’s approved environment.</span>
-        </div>
-        <div class="user-profile">
-          <span class="avatar lead" data-text="leadInitials"></span>
-          <div>
-            <div class="profile-name" data-text="leadFullName"></div>
-            <div class="profile-role" data-text="leadRole"></div>
-          </div>
+      <div class="user-profile">
+        <span class="avatar" data-text="leadInitials"></span>
+        <div>
+          <div class="profile-name" data-text="leadFullName"></div>
+          <div class="meta" data-text="leadRole"></div>
         </div>
       </div>
     </aside>
 
-    <!-- ============ Main area ============ -->
-    <main class="main-workspace">
-      <header class="topbar">
-        <div class="topbar-path">
-          <span class="text-muted">Workspace</span>
-          <span data-icon="chevronRight" data-size="12"></span>
-          <span>Start of day</span>
-        </div>
-        <span class="prototype-label">Interview prototype</span>
-      </header>
+    <!-- ============ Main ============ -->
+    <main class="main">
+      <div class="content">
 
-      <div class="page-content">
-        <div class="morning-header">
-          <div>
-            <div class="date-line" data-text="today"></div>
-            <h1>Good morning, <span data-text="leadName"></span><span>.</span></h1>
-            <p class="morning-subtitle">
-              Your team’s day, in one place.
-              <strong id="support-sentence"></strong>
-            </p>
-          </div>
-          <div class="capture-status">
-            <span data-icon="checkCheck" data-size="14"></span>Caught up as of <span data-text="caughtUpAt"></span>
-          </div>
-        </div>
+        <header class="page-header">
+          <div class="meta" data-text="today"></div>
+          <h1>Good morning, <span data-text="leadName"></span>.</h1>
+          <p class="lead" id="lead-sentence"></p>
+          <div class="stats" id="stats"></div>
+        </header>
 
-        <p class="summary-line" id="summary-line"></p>
+        <div class="grid">
+          <!-- What needs attention: the hero of the page -->
+          <section class="card" aria-labelledby="attention-heading">
+            <div class="card-header">
+              <h2 class="card-title" id="attention-heading">Needs attention</h2>
+            </div>
+            <ul class="attention-list" id="attention-list"></ul>
+          </section>
 
-        <div class="focus-layout">
-          <div>
-            <!-- At-risk cards -->
-            <section aria-labelledby="warning-heading">
-              <div class="section-heading">
-                <h2 class="section-title" id="warning-heading">
-                  <span class="text-warning" data-icon="flag" data-size="16"></span>
-                  A heads-up, before it’s late
-                  <span class="count-label" id="at-risk-count"></span>
-                </h2>
-                <span class="tiny-note">Not overdue</span>
-              </div>
-              <p class="section-description">Small check-ins today can keep these commitments on course.</p>
-              <div class="risk-grid" id="risk-grid"></div>
-            </section>
-
-            <!-- Overdue -->
-            <section class="overdue-section" id="overdue-section" aria-labelledby="overdue-heading">
-              <div class="section-heading">
-                <h2 class="section-title" id="overdue-heading">
-                  <span class="text-destructive" data-icon="clock" data-size="14"></span>
-                  Already overdue
-                  <span class="small-note" id="overdue-count"></span>
-                </h2>
-              </div>
-              <div id="overdue-list"></div>
-            </section>
-          </div>
-
-          <!-- Team column -->
-          <aside class="team-column" id="team-column" aria-labelledby="team-heading">
-            <div class="section-heading team-heading">
-              <h2 class="section-title" id="team-heading">Your team</h2>
-              <span class="text-muted" data-icon="users" data-size="14"></span>
+          <!-- Team summary -->
+          <section class="card" id="team-card" aria-labelledby="team-heading">
+            <div class="card-header">
+              <h2 class="card-title" id="team-heading">Your team</h2>
             </div>
             <div id="team-list"></div>
-            <div class="capture-note">
-              <div class="capture-note-title"><span data-icon="fileText" data-size="14"></span>Picked up automatically</div>
-              <p id="capture-sentence"></p>
-              <div class="capture-sources" id="capture-sources"></div>
-            </div>
-          </aside>
+          </section>
         </div>
 
-        <!-- All commitments table -->
+        <!-- Full list, collapsed by default -->
         <section class="all-work" id="all-work" aria-labelledby="all-work-heading">
-          <button class="btn btn-ghost commitments-toggle" id="commitments-toggle" aria-expanded="false" aria-controls="commitments-content"></button>
-          <div id="commitments-content" hidden>
-            <div class="section-heading">
-              <h2 class="section-title" id="all-work-heading">
-                All commitments <span class="small-note" id="table-count"></span>
-              </h2>
-              <div class="filter-bar">
-                <select class="filter-select" id="filter-engagement" aria-label="Filter engagement"></select>
-                <select class="filter-select" id="filter-owner" aria-label="Filter analyst"></select>
-                <select class="filter-select" id="filter-status" aria-label="Filter status">
-                  <option value="all">All statuses</option>
-                  <option value="at-risk">At risk</option>
-                  <option value="on-track">On track</option>
-                  <option value="overdue">Overdue</option>
-                </select>
-                <button class="btn btn-ghost btn-sm" id="filter-reset" hidden>Reset</button>
-              </div>
+          <h2 class="sr-only" id="all-work-heading">All commitments</h2>
+          <button class="btn-text all-work-toggle" id="all-work-toggle" aria-expanded="false" aria-controls="all-work-panel"></button>
+          <div class="card" id="all-work-panel" hidden>
+            <div class="filter-bar">
+              <select class="filter-select" id="filter-engagement" aria-label="Filter by engagement"></select>
+              <select class="filter-select" id="filter-owner" aria-label="Filter by person"></select>
+              <select class="filter-select" id="filter-status" aria-label="Filter by status">
+                <option value="all">Any status</option>
+                <option value="at-risk">At risk</option>
+                <option value="overdue">Overdue</option>
+                <option value="on-track">On track</option>
+              </select>
+              <button class="btn-text" id="filter-reset" hidden>Clear filters</button>
             </div>
             <table class="work-table">
-              <colgroup>
-                <col style="width:34%"><col style="width:13%"><col style="width:13%">
-                <col style="width:14%"><col style="width:23%"><col style="width:3%">
-              </colgroup>
               <thead>
                 <tr>
-                  <th>Commitment / engagement</th>
-                  <th>Owner</th>
-                  <th>Due date</th>
+                  <th>Commitment</th>
+                  <th class="col-owner">Owner</th>
+                  <th class="col-due">Due</th>
                   <th>Status</th>
-                  <th>Captured from</th>
-                  <th><span class="sr-only">Follow-up</span></th>
                 </tr>
               </thead>
               <tbody id="work-table-body"></tbody>
@@ -165,17 +99,14 @@
           </div>
         </section>
 
-        <footer class="page-footer">
-          <span class="footer-env"><span data-icon="shieldCheck" data-size="12"></span><span data-text="firmName"></span> · Firm-approved environment</span>
-          <span data-text="footerRight"></span>
-        </footer>
+        <footer class="page-footer" data-text="footer"></footer>
       </div>
     </main>
   </div>
 
-  <!-- Detail side panel (filled in by app.js when you click a commitment) -->
+  <!-- Side panel (filled in by app.js when you click a commitment) -->
   <div class="sheet-overlay" id="sheet-overlay" hidden></div>
-  <div class="detail-sheet" id="detail-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden></div>
 
   <script src="data.js"></script>
   <script src="app.js"></script>

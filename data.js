@@ -12,17 +12,16 @@ const SETTINGS = {
   leadFullName: "Alex Lee",
   leadInitials: "AL",
   leadRole: "Team lead · Advisory",
-  caughtUpAt: "8:30 am",
-  footerRight: "Sample scenario · Monday, 16 November",
+  footer: "Sample scenario · Commitments picked up automatically from meetings, emails and chats · Runs inside Linden Advisory’s approved environment",
 };
 
 /* The people on the team. The "id" must match the "owner"
    used in the commitments below. */
 const TEAM = [
   { id: "Priya", fullName: "Priya Shah", initials: "PS", role: "Analyst",
-    note: "A quick check-in could help.", noteIcon: "clock" },
+    note: "A quick check-in could help." },
   { id: "Marcus", fullName: "Marcus Chen", initials: "MC", role: "Analyst",
-    note: "— worth a priorities check-in.", noteIcon: "alert" },
+    note: "Worth a priorities check-in." },
 ];
 
 /* Client engagements. "dot" picks the color dot ("northwind"
