@@ -28,6 +28,8 @@ If something breaks, open the file's **History** and revert your last commit.
 
 Counts on the page, such as "4 at risk", "Five commitments could use a check-in today" and the per-person workload, are calculated from `data.js`. You don't need to update them by hand.
 
+**If a change doesn't show up:** browsers keep files for up to 10 minutes. To push a change to everyone right away, open `index.html` and raise the number in `?v=3` (on the `styles.css`, `data.js` and `app.js` lines) to `?v=4`, and so on.
+
 ## Previewing a change before it goes live (optional)
 
 Download the repo (**Code → Download ZIP**) and open `index.html` in a browser. Anything committed to `main` goes live automatically.
