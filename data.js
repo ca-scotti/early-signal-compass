@@ -7,6 +7,10 @@
 
 const SETTINGS = {
   today: "Monday, 16 November 2026",
+  /* The time the sample day is frozen at (24-hour clock). The plan
+     compares each item's "by" time against it to say whether a part
+     of the day is ahead or behind. */
+  now: "10:40",
   firmName: "Linden Advisory",
   leadName: "Alex",
   leadFullName: "Alex Lee",
@@ -22,6 +26,45 @@ const TEAM = [
     note: "A quick check-in could help." },
   { id: "Marcus", fullName: "Marcus Chen", initials: "MC", role: "Analyst",
     note: "Worth a priorities check-in." },
+];
+
+/* The three parts of the day on the Today page (24-hour clock). */
+const DAY_PARTS = [
+  { id: "morning", name: "Morning", start: "08:00", end: "12:00" },
+  { id: "afternoon", name: "Afternoon", start: "12:00", end: "17:00" },
+  { id: "evening", name: "Evening", start: "17:00", end: "20:00" },
+];
+
+/* What the team lead has to get done by end of day, in order.
+   part:        "morning", "afternoon" or "evening"
+   by:          the time it should be done by (24-hour clock)
+   done:        true if it is already ticked off in the sample
+   commitment:  for a check-in, the id of the commitment it is about
+                (its reason, due date and source come from there)
+   note:        for the lead's own tasks, one line of context */
+const TODAY_PLAN = [
+  { id: "p1", part: "morning", by: "09:00", done: true, commitment: 5,
+    title: "Agree a new send date with Priya for the request list" },
+  { id: "p2", part: "morning", by: "09:30", done: false, commitment: 3,
+    title: "Ask the client for the missing sales export" },
+  { id: "p3", part: "morning", by: "11:30", done: false,
+    title: "Finish the Northwind steering committee storyline",
+    note: "Northwind Retail · from Fri partner email" },
+  { id: "p4", part: "afternoon", by: "13:00", done: false, commitment: 4,
+    title: "15-min check-in with Priya: agree a review-ready outline" },
+  { id: "p5", part: "afternoon", by: "14:00", done: false,
+    title: "Partner check-in on Harbor Health readiness",
+    note: "Harbor Health · meeting at 2 pm" },
+  { id: "p6", part: "afternoon", by: "15:30", done: false, commitment: 2,
+    title: "15-min check-in with Marcus: what can move this week" },
+  { id: "p7", part: "afternoon", by: "16:30", done: false,
+    title: "Reply to the Harbor Health CFO about the workshop date",
+    note: "Harbor Health · from this morning's email" },
+  { id: "p8", part: "evening", by: "17:30", done: false, commitment: 1,
+    title: "Check in with Priya on the process map draft" },
+  { id: "p9", part: "evening", by: "18:30", done: false,
+    title: "Plan tomorrow's must-dos",
+    note: "10 minutes before you log off" },
 ];
 
 /* Client engagements. "dot" picks the color dot ("northwind"

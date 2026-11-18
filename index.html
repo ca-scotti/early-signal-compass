@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
   <div class="app">
@@ -45,19 +45,19 @@
       <div class="content">
 
         <header class="page-header">
-          <div class="meta" data-text="today"></div>
+          <div class="meta" id="now"></div>
           <h1>Good morning, <span data-text="leadName"></span>.</h1>
           <p class="lead" id="lead-sentence"></p>
           <div class="stats" id="stats"></div>
         </header>
 
         <div class="grid">
-          <!-- What needs attention: the hero of the page -->
-          <section class="card" aria-labelledby="attention-heading">
+          <!-- Today: what must be done by end of day, in order. The hero of the page -->
+          <section class="card" aria-labelledby="plan-heading">
             <div class="card-header">
-              <h2 class="card-title" id="attention-heading">Needs attention</h2>
+              <h2 class="card-title" id="plan-heading">By end of day</h2>
             </div>
-            <ul class="attention-list" id="attention-list"></ul>
+            <div id="plan"></div>
           </section>
 
           <!-- Team summary -->
@@ -108,7 +108,7 @@
   <div class="sheet-overlay" id="sheet-overlay" hidden></div>
   <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden></div>
 
-  <script src="data.js?v=3"></script>
-  <script src="app.js?v=3"></script>
+  <script src="data.js?v=4"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>
