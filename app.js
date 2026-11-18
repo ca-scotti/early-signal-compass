@@ -30,7 +30,7 @@ const NUMBER_WORDS = ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven
 
 const state = {
   selectedId: null,     // commitment open in the side panel
-  planned: new Set(),   // ids marked "follow-up planned"
+  done: new Set(TODAY_PLAN.filter((p) => p.done).map((p) => p.id)),   // plan items ticked off
   tableOpen: false,
   filters: { engagement: "all", owner: "all", status: "all" },
 };
@@ -60,9 +60,32 @@ function dueLabel(c) {
   return `Due in ${d} days`;
 }
 
-const needsAttention = () => COMMITMENTS
-  .filter((c) => c.status !== "on-track")
-  .sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || a.daysUntilDue - b.daysUntilDue);
+/* ---------- Time and the day plan ---------- */
+
+const minutes = (hhmm) => { const [h, m] = hhmm.split(":").map(Number); return h * 60 + m; };
+function clock(hhmm) {
+  const [h, m] = hhmm.split(":").map(Number);
+  const suffix = h < 12 ? "am" : "pm";
+  const hour = h % 12 || 12;
+  return m ? `${hour}:${String(m).padStart(2, "0")} ${suffix}` : `${hour} ${suffix}`;
+}
+const NOW = minutes(SETTINGS.now);
+const planFor = (commitmentId) => TODAY_PLAN.find((p) => p.commitment === commitmentId);
+const checkIns = () => TODAY_PLAN.filter((p) => p.commitment);
+
+/* How a part of the day is going: behind = not done and past its time,
+   ahead = done before its time. Always a word, never color alone. */
+function pace(part) {
+  const items = TODAY_PLAN.filter((p) => p.part === part.id);
+  const isDone = (p) => state.done.has(p.id);
+  if (minutes(part.start) > NOW && !items.some(isDone)) return { word: `Starts at ${clock(part.start)}`, tone: "" };
+  if (items.length && items.every(isDone)) return { word: "Done", tone: "on-track" };
+  const behind = items.filter((p) => !isDone(p) && minutes(p.by) <= NOW).length;
+  const ahead = items.filter((p) => isDone(p) && minutes(p.by) > NOW).length;
+  if (behind) return { word: `Behind by ${behind}`, tone: "at-risk" };
+  if (ahead) return { word: `Ahead by ${ahead}`, tone: "on-track" };
+  return { word: "On track", tone: "on-track" };
+}
 
 /* ---------- Static text ---------- */
 
@@ -83,45 +106,59 @@ function fillStatic() {
 
 function renderHeader() {
   const count = (s) => COMMITMENTS.filter((c) => c.status === s).length;
-  const n = needsAttention().length;
-  const word = NUMBER_WORDS[n] ?? n;
-  $("lead-sentence").textContent = n === 0
-    ? "Everything is on track today."
-    : `${word} commitment${n === 1 ? "" : "s"} could use a check-in today.`;
+  const left = TODAY_PLAN.filter((p) => !state.done.has(p.id));
+  const leftCheckIns = left.filter((p) => p.commitment).length;
+  const word = NUMBER_WORDS[left.length] ?? left.length;
+  $("now").textContent = `${SETTINGS.today} · ${clock(SETTINGS.now)}`;
+  $("lead-sentence").textContent = left.length === 0
+    ? "Everything on today's plan is done."
+    : `${word} thing${left.length === 1 ? "" : "s"} left to finish by end of day` +
+      (leftCheckIns ? `, including ${(NUMBER_WORDS[leftCheckIns] ?? String(leftCheckIns)).toLowerCase()} check-in${leftCheckIns === 1 ? "" : "s"}.` : ".");
   $("stats").innerHTML =
     `<span class="badge overdue">${count("overdue")} overdue</span>` +
     `<span class="badge at-risk">${count("at-risk")} at risk</span>` +
     `<span class="badge on-track">${count("on-track")} on track</span>`;
 }
 
-/* ---------- Needs attention ---------- */
+/* ---------- Today: the end-of-day plan ---------- */
 
-function followupButton(c) {
-  const done = state.planned.has(c.id);
-  return `<button class="btn btn-secondary" data-plan="${c.id}" ${done ? "disabled" : ""}>
-    ${done ? `${icon("check")}Planned` : "Plan follow-up"}
-    <span class="sr-only"> for ${escapeHtml(c.title)}</span></button>`;
+function planItem(p) {
+  const done = state.done.has(p.id);
+  const c = p.commitment ? byId(p.commitment) : null;
+  const late = !done && minutes(p.by) <= NOW;
+  const title = c
+    ? `<button class="plan-title" data-open="${c.id}">${escapeHtml(p.title)}</button>`
+    : `<span class="plan-title">${escapeHtml(p.title)}</span>`;
+  const meta = c
+    ? `${dot(c.engagement)}${escapeHtml(c.title)} · ${escapeHtml(person(c.owner).fullName)} · <span class="${c.daysUntilDue <= 1 ? "urgent" : ""}">${dueLabel(c)}</span>`
+    : escapeHtml(p.note || "");
+  return `
+    <li class="plan-item ${done ? "is-done" : ""} ${c && state.selectedId === c.id ? "selected" : ""}">
+      <input type="checkbox" class="plan-check" id="check-${p.id}" data-done="${p.id}" ${done ? "checked" : ""}
+        aria-label="Mark done: ${escapeHtml(p.title)}">
+      <div class="plan-body">
+        <div class="row-title-line">${title}${c && !done ? badge(c.status) : ""}</div>
+        <div class="row-meta meta">${meta}</div>
+        ${c && !done ? `<p class="row-reason">${escapeHtml(c.reason)}</p>` : ""}
+      </div>
+      <span class="plan-time ${late ? "urgent" : ""}">${late ? "Was due " : "By "}${clock(p.by)}</span>
+    </li>`;
 }
 
-function renderAttention() {
-  const items = needsAttention();
-  $("attention-list").innerHTML = items.length === 0
-    ? `<li class="meta" style="padding:16px 8px">Nothing needs attention today.</li>`
-    : items.map((c) => `
-      <li class="attention-row ${state.selectedId === c.id ? "selected" : ""}" data-open="${c.id}">
-        <div>
-          <div class="row-title-line">
-            <button class="row-title" data-open="${c.id}">${escapeHtml(c.title)}</button>
-            ${badge(c.status)}
-          </div>
-          <div class="row-meta meta">${dot(c.engagement)}${escapeHtml(c.engagement)} · ${escapeHtml(person(c.owner).fullName)}</div>
-          <p class="row-reason">${escapeHtml(c.reason)}</p>
+function renderPlan() {
+  $("plan").innerHTML = DAY_PARTS.map((part) => {
+    const items = TODAY_PLAN.filter((p) => p.part === part.id).sort((a, b) => minutes(a.by) - minutes(b.by));
+    const status = pace(part);
+    const isNow = minutes(part.start) <= NOW && NOW < minutes(part.end);
+    return `
+      <section class="day-part ${isNow ? "is-now" : ""}" aria-labelledby="part-${part.id}">
+        <div class="day-part-head">
+          <h3 id="part-${part.id}">${part.name}<span class="meta"> · ${clock(part.start)}–${clock(part.end)}${isNow ? " · now" : ""}</span></h3>
+          <span class="${status.tone ? `badge ${status.tone}` : "meta"}">${status.word}</span>
         </div>
-        <div class="row-side">
-          <span class="due ${c.daysUntilDue <= 1 ? "urgent" : ""}">${dueLabel(c)}</span>
-          ${followupButton(c)}
-        </div>
-      </li>`).join("");
+        <ul class="plan-list">${items.map(planItem).join("")}</ul>
+      </section>`;
+  }).join("");
 }
 
 /* ---------- Team ---------- */
@@ -172,7 +209,7 @@ function renderTable() {
     : rows.map((c) => `
       <tr data-open="${c.id}">
         <td>
-          <div class="title-cell">${escapeHtml(c.title)}${state.planned.has(c.id) ? `<span class="planned-mark">· Follow-up planned</span>` : ""}</div>
+          <div class="title-cell">${escapeHtml(c.title)}${planFor(c.id) && state.done.has(planFor(c.id).id) ? `<span class="planned-mark">· Checked in today</span>` : ""}</div>
           <div class="meta">${escapeHtml(c.engagement)}</div>
         </td>
         <td class="col-owner"><span class="owner">${avatar(c.owner, "small")}${escapeHtml(c.owner)}</span></td>
@@ -197,7 +234,8 @@ function renderSheet() {
   document.body.style.overflow = c ? "hidden" : "";
   if (!c) { sheet.innerHTML = ""; return; }
 
-  const planned = state.planned.has(c.id);
+  const plan = planFor(c.id);
+  const checkedIn = plan && state.done.has(plan.id);
   const program = engagement(c.engagement).program;
 
   sheet.innerHTML = `
@@ -226,12 +264,12 @@ function renderSheet() {
 
     ${c.nextStep ? `
     <div class="sheet-section">
-      <h3>Suggested next step</h3>
-      <p class="next-step">${escapeHtml(c.nextStep)}</p>
-      <button class="btn btn-primary" data-plan="${c.id}" ${planned ? "disabled" : ""}>
-        ${planned ? `${icon("check")}Follow-up planned` : "Mark follow-up planned"}
+      <h3>${plan ? `On your plan for ${DAY_PARTS.find((d) => d.id === plan.part).name.toLowerCase()}, by ${clock(plan.by)}` : "Suggested next step"}</h3>
+      <p class="next-step">${escapeHtml(plan ? plan.title : c.nextStep)}</p>
+      ${plan ? `<button class="btn btn-primary" data-done-toggle="${plan.id}" ${checkedIn ? "disabled" : ""}>
+        ${checkedIn ? `${icon("check")}Check-in done` : "Mark check-in done"}
       </button>
-      ${planned ? `<p class="confirmation">Planned for today. The status stays “${STATUS_LABEL[c.status].toLowerCase()}” until the work moves.</p>` : ""}
+      ${checkedIn ? `<p class="confirmation">Done for today. The status stays “${STATUS_LABEL[c.status].toLowerCase()}” until the work moves.</p>` : ""}` : ""}
     </div>` : ""}`;
 }
 
@@ -251,7 +289,8 @@ function closeSheet() {
 /* ---------- Render ---------- */
 
 function renderAll() {
-  renderAttention();
+  renderHeader();
+  renderPlan();
   renderTable();
   renderSheet();
 }
@@ -263,10 +302,11 @@ function setActiveNav(key) {
 /* ---------- Events ---------- */
 
 document.addEventListener("click", (event) => {
-  const t = event.target.closest("[data-plan], [data-close], [data-open], [data-nav], #all-work-toggle, #filter-reset, #sheet-overlay");
+  if (event.target.matches(".plan-check")) return;   // handled by the change listener below
+  const t = event.target.closest("[data-done-toggle], [data-close], [data-open], [data-nav], #all-work-toggle, #filter-reset, #sheet-overlay");
   if (!t) return;
 
-  if (t.dataset.plan) { state.planned.add(Number(t.dataset.plan)); return renderAll(); }
+  if (t.dataset.doneToggle) { state.done.add(t.dataset.doneToggle); return renderAll(); }
   if (t.hasAttribute("data-close") || t.id === "sheet-overlay") return closeSheet();
   if (t.dataset.open) return openSheet(Number(t.dataset.open));
   if (t.id === "all-work-toggle") { state.tableOpen = !state.tableOpen; return renderTable(); }
@@ -284,6 +324,14 @@ document.addEventListener("click", (event) => {
   $(id).addEventListener("change", (e) => { state.filters[key] = e.target.value; renderTable(); });
 });
 
+document.addEventListener("change", (e) => {
+  if (!e.target.matches(".plan-check")) return;
+  const id = e.target.dataset.done;
+  if (e.target.checked) state.done.add(id); else state.done.delete(id);
+  renderAll();
+  document.getElementById(`check-${id}`)?.focus({ preventScroll: true });
+});
+
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && state.selectedId !== null) closeSheet();
 });
@@ -291,6 +339,5 @@ document.addEventListener("keydown", (e) => {
 /* ---------- Start ---------- */
 
 fillStatic();
-renderHeader();
 renderTeam();
 renderAll();

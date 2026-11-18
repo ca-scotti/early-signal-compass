@@ -249,36 +249,49 @@ table { border-collapse: collapse; width: 100%; }
 .card-header { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-md); margin-bottom: var(--space-sm); }
 .card-title { font-size: 16px; font-weight: 600; }
 
-/* ---------- Needs attention list ---------- */
+/* ---------- Today: the end-of-day plan ---------- */
 
-.attention-list { list-style: none; margin: 0 calc(var(--space-sm) * -1); }
-
-.attention-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--space-md);
+.day-part { padding-top: var(--space-md); }
+.day-part + .day-part { margin-top: var(--space-sm); border-top: 1px solid var(--border); }
+.day-part-head {
+  display: flex;
   align-items: center;
-  padding: var(--space-md) var(--space-sm);
-  border-top: 1px solid var(--border);
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xs);
+}
+.day-part-head h3 { font-size: 14px; font-weight: 600; }
+.day-part-head h3 .meta { font-weight: 400; }
+
+.plan-list { list-style: none; margin: 0 calc(var(--space-sm) * -1); }
+.plan-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  padding: 12px var(--space-sm);
   border-radius: var(--rounded-md);
+}
+.plan-item:hover { background: var(--neutral); }
+.plan-item.selected { background: var(--tertiary-soft); }
+
+.plan-check {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--tertiary);
   cursor: pointer;
 }
-.attention-row:first-child { border-top: 0; }
-.attention-row:hover { background: var(--neutral); }
-.attention-row.selected { background: var(--tertiary-soft); }
+.plan-title { font-size: 15px; font-weight: 600; text-align: left; }
+button.plan-title:hover { color: var(--tertiary); }
+.plan-item.is-done .plan-title { color: var(--secondary); font-weight: 500; text-decoration: line-through; }
 
-.row-title-line { display: flex; align-items: center; gap: 10px; }
-.row-title {
-  font-size: 15px;
-  font-weight: 600;
-  text-align: left;
-}
-.row-meta { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+.row-title-line { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; }
+.row-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
 .row-reason { margin-top: 6px; color: var(--primary); font-size: 14px; }
 
-.row-side { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-sm); }
-.due { font-size: 13px; font-weight: 500; white-space: nowrap; }
-.due.urgent { color: var(--danger); }
+.plan-time { padding-top: 2px; font-size: 13px; font-weight: 500; color: var(--secondary); white-space: nowrap; }
+.urgent { color: var(--danger); }
 
 /* ---------- Team card ---------- */
 
@@ -428,8 +441,8 @@ table { border-collapse: collapse; width: 100%; }
   .nav-item { width: auto; }
   .main { padding: var(--space-lg) var(--space-md); }
   .card { padding: var(--space-md); }
-  .attention-row { grid-template-columns: 1fr; }
-  .row-side { flex-direction: row; justify-content: space-between; align-items: center; }
+  .plan-item { grid-template-columns: auto minmax(0, 1fr); }
+  .plan-time { grid-column: 2; padding-top: 0; }
   .work-table .col-owner, .work-table .col-due { display: none; }
 }
 

@@ -117,13 +117,20 @@ components:
 
 Ahead is read once, first thing in the morning, by a team lead who has a few
 minutes. The interface should feel like a calm briefing, not a dashboard.
-Every screen answers one question first: *what needs me today?* Everything
-else is one click away, never on the first screen.
+Every screen answers one question first: *what do I need to get done by end
+of day, and am I ahead or behind?* Everything else is one click away, never on
+the first screen.
 
 Guiding principles:
 
-- **One focus per screen.** The "Needs attention" list is the hero. The team
-  summary supports it, and the full list stays collapsed until asked for.
+- **One focus per screen.** The "By end of day" plan is the hero: the lead's
+  day in order, split into morning, afternoon and evening, with check-ins on
+  at-risk work slotted in. The team summary supports it, and the full list
+  stays collapsed until asked for.
+- **A sequence, not a grid.** In interviews, a grid of warnings felt "too
+  much". The plan reads top to bottom, like the day.
+- **Warnings are actions.** An at-risk commitment shows up as a check-in on the
+  plan ("15-min check-in with Priya"), not as a status card.
 - **Show the reason, hide the record.** A row shows what's wrong and when it's
   due. The source, excerpt, progress and next step live in the side panel.
 - **Calm by default.** Color is reserved for status. Everything else is ink on
@@ -161,7 +168,7 @@ Avoid uppercase labels and monospace text. Both make the page feel busier.
 ## Layout
 
 - A fixed 232px sidebar and a content column that tops out at 1080px.
-- Main area: a two-thirds/one-third grid. "Needs attention" sits on the left
+- Main area: a two-thirds/one-third grid. "By end of day" sits on the left
   and "Your team" on the right. Below 960px it becomes a single column.
 - An 8px spacing rhythm: 16px inside list rows, 24px inside cards, 40px between
   major sections.
@@ -180,21 +187,28 @@ Rounded but not soft: 14px for cards, 10px for list rows and the panel,
 
 ## Components
 
-- **Attention row:** title with its status badge, then one meta line
-  (engagement · owner) and one line of reason. On the right: the due label
-  (danger color when due within a day) and a single "Plan follow-up" button.
-  The whole row opens the side panel. Overdue items come first, then the
-  soonest due.
+- **Day part:** a heading with its time range ("Morning · 8 am–12 pm · now")
+  and one pace word on the right: "Behind by N" (warning badge), "Ahead by N"
+  or "On track" (success badge), "Done", or "Starts at …" (plain meta text
+  before it starts). Behind means not done and past its time; ahead means done
+  before its time.
+- **Plan item:** a checkbox, the action as the title, then one meta line. For a
+  check-in, the meta line is the commitment · owner · due label (danger color
+  when due within a day), with the status badge after the title and one line
+  of reason; the title opens the side panel. On the right: "By 1 pm", or "Was
+  due 9:30 am" in the danger color once it is late. Done items are struck
+  through and drop their badge and reason.
 - **Team member:** avatar, name, "N commitments · N due this week", and one
   stacked status bar. No per-engagement breakdown on the first screen.
 - **Side panel:** title, a short fact grid, the reason, the original quote and
-  the suggested next step with the primary button.
+  where the check-in sits on today's plan, with the primary button "Mark
+  check-in done".
 - **Buttons:** one primary button per view at most (in the side panel). In
   lists, use the secondary button.
 
 ## Do's and Don'ts
 
-- **Do** lead with the 4–6 items that need action, and keep counts in one place.
+- **Do** lead with the day's plan in order, and keep counts in one place.
 - **Do** keep each row to two lines of text plus a badge.
 - **Don't** show the same number twice on one screen.
 - **Don't** add icons that only decorate. Use an icon only when it carries
