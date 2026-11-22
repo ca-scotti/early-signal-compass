@@ -100,6 +100,12 @@ const NOW = minutes(SETTINGS.now);
 const byTime = (a, b) => minutes(a.by) - minutes(b.by);
 const planFor = (commitmentId) => TODAY_PLAN.find((p) => p.commitment === commitmentId);
 
+/* A step-in is no longer needed once the analyst marks that work done
+   (in their own view). It then counts as off the plan, like a done item. */
+const resolvedBy = (p) =>
+  p.commitment && !state.done.has(p.id) && ownerDone(p.commitment) ? byId(p.commitment)?.owner : null;
+const isOff = (p) => state.done.has(p.id) || !!resolvedBy(p);
+
 /* The part of the day we are in now (or the nearest one outside working hours). */
 function currentPart() {
   return DAY_PARTS.find((d) => minutes(d.start) <= NOW && NOW < minutes(d.end))
@@ -108,7 +114,7 @@ function currentPart() {
 
 /* How the current part of the day is going, in words (never color alone). */
 function paceLine(part, items) {
-  const open = items.filter((p) => !state.done.has(p.id));
+  const open = items.filter((p) => !isOff(p));
   const late = open.filter((p) => minutes(p.by) <= NOW).length;
   const until = `Until ${clock(part.end)}`;
   if (!open.length) return `${until} · All done`;
@@ -120,7 +126,8 @@ function paceLine(part, items) {
    "Step in" tag and a "Why now" line; the lead's own tasks may carry a note.
    "quiet" rows show the title, time and an inline tag only. */
 function planItem(p, quiet = false) {
-  const done = state.done.has(p.id);
+  const resolved = resolvedBy(p);
+  const done = state.done.has(p.id) || !!resolved;
   const c = p.commitment ? byId(p.commitment) : null;
   const late = !done && minutes(p.by) <= NOW;
   const title = c
@@ -131,10 +138,11 @@ function planItem(p, quiet = false) {
     if (c) second = `<p class="plan-why"><span class="step-in">Step in · ${escapeHtml(c.owner)}</span>${escapeHtml(c.reason)}</p>`;
     else if (p.note) second = `<p class="plan-why meta">${escapeHtml(p.note)}</p>`;
   }
+  if (resolved) second = `<p class="plan-why resolved-note">${icon("check")}No step-in needed · ${escapeHtml(resolved)} marked it done</p>`;
   const inlineTag = !done && quiet && c ? `<span class="step-in inline">Step in</span>` : "";
   return `
-    <li class="plan-item ${quiet ? "quiet" : ""} ${c && !done && !quiet ? "is-step-in" : ""} ${done ? "is-done" : ""} ${c && state.selectedId === c.id ? "selected" : ""}">
-      <input type="checkbox" class="plan-check" id="check-${p.id}" data-done="${p.id}" ${done ? "checked" : ""}
+    <li class="plan-item ${quiet ? "quiet" : ""} ${c && !done && !quiet ? "is-step-in" : ""} ${done ? "is-done" : ""} ${resolved ? "is-resolved" : ""} ${c && state.selectedId === c.id ? "selected" : ""}">
+      <input type="checkbox" class="plan-check" id="check-${p.id}" data-done="${p.id}" ${done ? "checked" : ""} ${resolved ? "disabled" : ""}
         aria-label="Mark done: ${escapeHtml(p.title)}">
       <div class="plan-body">${title}${inlineTag}${second}</div>
       <span class="plan-time ${late ? "is-late" : ""}">${late ? "Past " : ""}${clock(p.by)}</span>
@@ -150,17 +158,17 @@ function renderToday() {
 
   // Right now: this part of the day, plus anything left over from earlier parts.
   // Unfinished first, in time order; done items at the bottom.
-  const nowItems = TODAY_PLAN.filter((p) => p.part === part.id || (earlierIds.includes(p.part) && !state.done.has(p.id)));
+  const nowItems = TODAY_PLAN.filter((p) => p.part === part.id || (earlierIds.includes(p.part) && !isOff(p)));
 
   $("greeting").textContent = "";
   $("now-heading").textContent = `Good morning, ${SETTINGS.leadName}`;
-  const left = TODAY_PLAN.filter((p) => !state.done.has(p.id));
+  const left = TODAY_PLAN.filter((p) => !isOff(p));
   const leftSteps = left.filter((p) => p.commitment).length;
 
   // Done today: a number and a meter
-  const doneCount = TODAY_PLAN.filter((p) => state.done.has(p.id)).length;
+  const doneCount = TODAY_PLAN.filter(isOff).length;
   const steps = TODAY_PLAN.filter((p) => p.commitment);
-  const stepsDone = steps.filter((p) => state.done.has(p.id)).length;
+  const stepsDone = steps.filter(isOff).length;
   $("day-progress").innerHTML = `
     <div class="dp-top"><span class="dp-num">${doneCount}</span><span class="meta">of ${TODAY_PLAN.length} done today</span></div>
     <div class="meter" role="img" aria-label="${doneCount} of ${TODAY_PLAN.length} done"><span style="width:${pct(doneCount, TODAY_PLAN.length)}%"></span></div>
@@ -174,8 +182,8 @@ function renderToday() {
   // in time order, done ones at the bottom. The current part is highlighted.
   $("parts").innerHTML = DAY_PARTS.map((d, i) => {
     const items = TODAY_PLAN.filter((p) => p.part === d.id);
-    const open = items.filter((p) => !state.done.has(p.id)).sort(byTime);
-    const finished = items.filter((p) => state.done.has(p.id)).sort(byTime);
+    const open = items.filter((p) => !isOff(p)).sort(byTime);
+    const finished = items.filter(isOff).sort(byTime);
     const isNow = d === part;
     const status = isNow ? paceLine(d, items).replace(/^Until [^·]+· /, "")
       : i < partIndex ? (open.length ? `${open.length} left over` : "All done")
@@ -198,7 +206,7 @@ function renderToday() {
   }).join("");
 
   $("team-tiles").innerHTML = TEAM.map((p) => {
-    const steps = TODAY_PLAN.filter((t) => t.commitment && byId(t.commitment)?.owner === p.id && !state.done.has(t.id)).sort(byTime);
+    const steps = TODAY_PLAN.filter((t) => t.commitment && byId(t.commitment)?.owner === p.id && !isOff(t)).sort(byTime);
     const next = steps[0];
     const trend = HISTORY.team[p.id] ? onTimeSeries(p.id) : null;
     return `
@@ -228,9 +236,9 @@ function renderStrip(nowPart) {
   const ticks = [];
   for (let m = start; m <= end; m += 120) ticks.push(`<span class="strip-tick" style="left:${pos(m)}%">${clock(`${Math.floor(m / 60)}:${String(m % 60).padStart(2, "0")}`)}</span>`);
   const dots = TODAY_PLAN.map((p) => {
-    const done = state.done.has(p.id);
+    const done = isOff(p);
     const c = p.commitment ? byId(p.commitment) : null;
-    return `<button class="strip-dot ${c ? "step" : "own"} ${done ? "done" : ""}" style="left:${pos(minutes(p.by))}%"
+    return `<button class="strip-dot ${c ? "step" : "own"} ${done ? "done" : ""} ${resolvedBy(p) ? "resolved" : ""}" style="left:${pos(minutes(p.by))}%"
       data-dot="${p.id}" ${c ? `data-open="${c.id}"` : ""} aria-label="${escapeHtml(p.title)}, by ${clock(p.by)}${done ? ", done" : ""}">${done ? icon("check") : ""}</button>`;
   }).join("");
   const strip = $("day-strip");
@@ -242,7 +250,7 @@ function renderStrip(nowPart) {
     <div class="strip-ticks">${ticks.join("")}</div>
     <div class="strip-key" aria-hidden="true">
       <span><i class="k-step"></i>Step in</span><span><i class="k-own"></i>Your task</span>
-      <span><i class="k-done"></i>Done</span><span><i class="k-now"></i>Now</span>
+      <span><i class="k-done"></i>Done</span>${TODAY_PLAN.some((p) => resolvedBy(p)) ? `<span><i class="k-resolved"></i>Not needed</span>` : ""}<span><i class="k-now"></i>Now</span>
     </div>`;
 
   strip.querySelectorAll(".strip-dot").forEach((b) => {
@@ -250,7 +258,7 @@ function renderStrip(nowPart) {
     const c = p.commitment ? byId(p.commitment) : null;
     const tip = () => {
       const r = b.getBoundingClientRect();
-      Viz.showTip(r.left + r.width / 2, r.top, `${clock(p.by)} · ${state.done.has(p.id) ? "Done" : c ? "Step in" : "Your task"}`,
+      Viz.showTip(r.left + r.width / 2, r.top, `${clock(p.by)} · ${resolvedBy(p) ? `Not needed: ${resolvedBy(p)} marked it done` : state.done.has(p.id) ? "Done" : c ? "Step in" : "Your task"}`,
         [{ color: c ? "#3B5BDB" : "#B8BDC5", name: p.title, value: "", shape: "rect" }]);
     };
     b.addEventListener("pointerenter", tip);
@@ -268,7 +276,7 @@ function renderTeam() {
 
   $("team-grid").innerHTML = TEAM.map((p) => {
     const mine = commitmentsOf(p.id);
-    const steps = TODAY_PLAN.filter((t) => t.commitment && byId(t.commitment)?.owner === p.id && !state.done.has(t.id)).sort(byTime);
+    const steps = TODAY_PLAN.filter((t) => t.commitment && byId(t.commitment)?.owner === p.id && !isOff(t)).sort(byTime);
     const attention = mine.filter(needsYou);
     return `
       <a class="card member-card" href="#/team/${encodeURIComponent(p.id)}">
@@ -336,9 +344,9 @@ function renderProgress() {
   const W = HISTORY.weeks, last = W.length - 1;
 
   // You: today's plan (live: follows the ticks on Top priorities)
-  const doneToday = TODAY_PLAN.filter((p) => state.done.has(p.id)).length;
+  const doneToday = TODAY_PLAN.filter(isOff).length;
   const stepsToday = TODAY_PLAN.filter((p) => p.commitment);
-  const stepsDone = stepsToday.filter((p) => state.done.has(p.id)).length;
+  const stepsDone = stepsToday.filter(isOff).length;
   const L = HISTORY.lead;
   const leadRate = L.done.map((d, i) => pct(d, L.planned[i]));
   const F = HISTORY.flagged;
@@ -479,6 +487,7 @@ function renderSheet() {
 
   const plan = planFor(c.id);
   const checkedIn = plan && state.done.has(plan.id);
+  const notNeeded = plan && resolvedBy(plan);
   const program = engagement(c.engagement).program;
 
   // An analyst sees their own commitment and its source, never the lead's
@@ -533,7 +542,8 @@ function renderSheet() {
     <div class="sheet-section">
       <h3>${plan ? `On your plan for ${DAY_PARTS.find((d) => d.id === plan.part).name.toLowerCase()}, by ${clock(plan.by)}` : "Suggested next step"}</h3>
       <p class="next-step">${escapeHtml(plan ? plan.title : c.nextStep)}</p>
-      ${plan ? `<button class="btn btn-primary" data-done-toggle="${plan.id}" ${checkedIn ? "disabled" : ""}>
+      ${notNeeded ? `<p class="resolved-callout">${icon("check")}${escapeHtml(notNeeded)} marked this done, so this step-in is no longer needed.</p>` : ""}
+      ${plan && !notNeeded ? `<button class="btn btn-primary" data-done-toggle="${plan.id}" ${checkedIn ? "disabled" : ""}>
         ${checkedIn ? `${icon("check")}Done` : "Mark done"}
       </button>
       ${checkedIn ? `<p class="confirmation">Done for today. The status stays “${STATUS_LABEL[c.status].toLowerCase()}” until the work moves.</p>` : ""}` : ""}
@@ -709,7 +719,8 @@ function renderMy() {
   $("my-checkins-title").textContent = `Check-ins with ${lead} today`;
   $("my-checkins").innerHTML = checks.length ? checks.map((t) => {
     const title = t.title.includes(`with ${me}`) ? t.title.replace(`with ${me}`, `with ${lead}`) : `${lead}: ${t.title}`;
-    return `<li class="${state.done.has(t.id) ? "is-done" : ""}"><span>${escapeHtml(title)}</span><span class="meta">${clock(t.by)}</span></li>`;
+    const notNeeded = !!resolvedBy(t);
+    return `<li class="${isOff(t) ? "is-done" : ""}"><span>${escapeHtml(title)}${notNeeded ? `<span class="meta resolved-mini"> · not needed, you marked it done</span>` : ""}</span><span class="meta">${clock(t.by)}</span></li>`;
   }).join("") : `<li><span class="meta">No check-ins planned today.</span></li>`;
 
   // Their projects

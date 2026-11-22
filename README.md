@@ -29,7 +29,7 @@ If something breaks, open the file's **History** and revert your last commit.
 
 Words and counts on the page, such as "This morning", "1 past its time" and "3 due this week", are calculated from `data.js`. You don't need to update them by hand.
 
-**If a change doesn't show up:** browsers keep files for up to 10 minutes. To push a change to everyone right away, open `index.html` and raise the number in `?v=12` (on the `styles.css`, `data.js`, `charts.js` and `app.js` lines) to `?v=13`, and so on.
+**If a change doesn't show up:** browsers keep files for up to 10 minutes. To push a change to everyone right away, open `index.html` and raise the number in `?v=13` (on the `styles.css`, `data.js`, `charts.js` and `app.js` lines) to `?v=14`, and so on.
 
 ## Demo: connecting email and the team view
 
@@ -38,7 +38,7 @@ Everything here is **fake** and saved only in your own browser:
 1. Click **Alex Lee** at the bottom of the sidebar to open **Profile**.
 2. Under **Connected sources**, click **Connect** on Outlook or Teams, then **Scan now**. Ahead "finds" four commitments (sample data in `FOUND_IN_SCAN` in `data.js`). **Add** them: they join the plan, the team pages and All commitments. One adds a new step-in for Marcus.
 3. Under **Team access**, **Connect** Priya or Marcus, then **View as Priya**. You now see only her work: **My day** (her to-dos, check-ins with Alex, her projects) and **My commitments**. No team page, no progress charts, nothing about Marcus, and none of Alex's "why now" notes.
-4. Tick a to-do as Priya, then **Back to Alex**: All commitments shows "Marked done by Priya".
+4. Tick a to-do as Priya (try **Audit readiness assessment**), then **Back to Alex**: the 1 pm check-in with Priya is no longer needed. It drops to the bottom of Afternoon with "No step-in needed · Priya marked it done", the counts update, and All commitments shows "Marked done by Priya".
 5. **Reset demo** at the bottom of Profile puts everything back.
 
 ## Previewing a change before it goes live (optional)

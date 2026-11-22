@@ -244,8 +244,9 @@ row in the card has a 3px indigo edge on the left.
 - **Day timeline:** sits on the page (no box). 8 am to 8 pm in the three
   daylight tints with a small icon and name in their deeper shade, an ink "now" line, and each to-do as a
   14px dot at its time: indigo for a step-in, white with a grey ring for the
-  lead's own task, grey with a check when done. A key under it explains every
-  dot. Hover or focus shows the item; clicking a step-in opens it.
+  lead's own task, grey with a check when done, green with a check when the
+  analyst finished the work so the step-in is no longer needed. A key under it
+  explains every dot. Hover or focus shows the item; clicking a step-in opens it.
 - **Done today:** the count (28px), "of N done today", a blue meter on a light
   blue track, and "N of N step-ins".
 - **Part-of-day lists:** one white panel split into three columns by
@@ -317,6 +318,11 @@ this app answers each:
 
 ### General
 
+- **The analyst's tick closes the loop.** When Priya or Marcus marks a
+  commitment done in their own view, any step-in Alex planned for it is no
+  longer needed: it leaves the open lists, counts and team pages, and shows
+  at the bottom of its part of the day as "No step-in needed · Priya marked it
+  done" (green check), never deleted silently.
 - **Each person sees only their own work.** Analysts never see the team
   page, the progress charts, another analyst's work or the lead's notes about
   them. Check-ins appear to them as plain times ("15-min check-in with Alex,

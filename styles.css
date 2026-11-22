@@ -278,6 +278,7 @@ table { border-collapse: collapse; width: 100%; }
 .strip-key .k-step { background: var(--tertiary); }
 .strip-key .k-own { border: 2px solid #A39E93; }
 .strip-key .k-done { background: var(--muted); }
+.strip-key .k-resolved { background: var(--success); }
 .strip-key .k-now { width: 2px; height: 12px; border-radius: 1px; background: var(--primary); }
 
 /* ---------- Buttons ---------- */
@@ -721,6 +722,15 @@ a.user-profile:hover .profile-name, a.user-profile.active .profile-name { color:
 .project-row { padding: 12px 0; border-top: 1px solid var(--border); }
 .project-row:first-child { border-top: 0; padding-top: var(--space-xs); }
 body.as-analyst .col-owner, body.as-analyst .col-status, body.as-analyst #filter-owner, body.as-analyst #filter-status { display: none; }
+
+/* A step-in that's no longer needed because the analyst finished the work */
+.plan-why.resolved-note { display: flex; align-items: center; gap: 6px; color: var(--success); font-size: 13px; }
+.plan-why.resolved-note svg { width: 13px; height: 13px; flex-shrink: 0; }
+.plan-item.is-resolved .plan-check { cursor: default; }
+.resolved-callout { display: flex; align-items: flex-start; gap: 8px; padding: 12px 14px; border-radius: var(--rounded-md); background: var(--success-soft); color: var(--success); }
+.resolved-callout svg { width: 16px; height: 16px; margin-top: 3px; flex-shrink: 0; }
+.resolved-mini { font-style: normal; }
+.strip-dot.done.resolved { background: var(--success); }
 
 /* ---------- Shorter laptop screens: tighten Top priorities so it still fits ---------- */
 
