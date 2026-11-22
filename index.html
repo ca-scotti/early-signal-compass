@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body>
   <div class="app">
@@ -46,11 +46,18 @@
 
       <!-- Top priorities: what's left right now, and later today -->
       <section class="page" id="page-today" aria-labelledby="now-heading">
-        <header class="page-head">
-          <p class="meta" id="greeting"></p>
-          <h1 id="now-heading"></h1>
-          <p class="page-sub" id="now-pace"></p>
+        <header class="page-head today-head">
+          <div>
+            <p class="meta" id="greeting"></p>
+            <h1 class="now-title"><span class="part-chip" id="now-chip"></span><span id="now-heading"></span></h1>
+            <p class="page-sub" id="now-pace"></p>
+          </div>
+          <div class="day-progress" id="day-progress"></div>
         </header>
+        <!-- The day at a glance: 8 am to 8 pm, with every to-do as a dot -->
+        <div class="card day-strip-card">
+          <div class="day-strip" id="day-strip" aria-label="Today's plan on a timeline"></div>
+        </div>
         <div class="page-grid today-grid">
           <div class="stack">
             <div class="card">
@@ -178,8 +185,8 @@
   <div class="sheet-overlay" id="sheet-overlay" hidden></div>
   <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden></div>
 
-  <script src="data.js?v=7"></script>
-  <script src="charts.js?v=7"></script>
-  <script src="app.js?v=7"></script>
+  <script src="data.js?v=8"></script>
+  <script src="charts.js?v=8"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>

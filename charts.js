@@ -243,5 +243,5 @@ const Viz = (() => {
     t = setTimeout(() => drawn.forEach((draw, plot) => { if (plot.isConnected) { if (plot.offsetParent) draw(); } else drawn.delete(plot); }), 120);
   });
 
-  return { line, columns, spark, hideTip };
+  return { line, columns, spark, hideTip, showTip };
 })();

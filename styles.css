@@ -26,6 +26,12 @@
   --engagement-northwind: #7C5CFC;
   --engagement-harbor: #0E9384;
 
+  /* Parts of the day: a soft tint and a deeper icon color each.
+     Decorative identity only, never status. */
+  --morning: #E7F5FF;   --morning-ink: #1C7ED6;
+  --afternoon: #FFF4E6; --afternoon-ink: #E8590C;
+  --evening: #F3F0FF;   --evening-ink: #7048E8;
+
   /* Shape */
   --rounded-sm: 6px;
   --rounded-md: 10px;
@@ -208,6 +214,97 @@ table { border-collapse: collapse; width: 100%; }
 .avatar.small { width: 24px; height: 24px; font-size: 11px; }
 .avatar.tiny { width: 20px; height: 20px; font-size: 9px; }
 .avatar.large { width: 48px; height: 48px; font-size: 15px; background: var(--tertiary-soft); color: var(--tertiary); border-color: transparent; }
+.avatar.tiny { width: 18px; height: 18px; font-size: 8px; }
+/* A team member's avatar wears their own chart color */
+.avatar.person {
+  background: color-mix(in srgb, var(--pc) 14%, white);
+  color: color-mix(in srgb, var(--pc) 75%, black);
+  border-color: transparent;
+}
+
+/* ---------- Top priorities: header, progress, day strip ---------- */
+
+.today-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-lg); }
+.now-title { display: flex; align-items: center; gap: 12px; }
+.part-chip {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--rounded-md);
+  background: var(--neutral);
+  color: var(--secondary);
+}
+.part-chip svg { width: 20px; height: 20px; }
+.part-chip.small { width: 22px; height: 22px; border-radius: var(--rounded-sm); margin-right: 8px; vertical-align: -6px; }
+.part-chip.small svg { width: 14px; height: 14px; }
+.part-chip.morning { background: var(--morning); color: var(--morning-ink); }
+.part-chip.afternoon { background: var(--afternoon); color: var(--afternoon-ink); }
+.part-chip.evening { background: var(--evening); color: var(--evening-ink); }
+
+.day-progress { width: 240px; display: flex; flex-direction: column; gap: 6px; }
+.dp-top { display: flex; align-items: baseline; gap: 8px; }
+.dp-num { font-size: 28px; font-weight: 600; line-height: 1; }
+
+.day-strip-card { padding: 14px var(--space-lg) 10px; }
+.day-strip { position: relative; }
+.strip-track { position: relative; height: 44px; }
+.strip-seg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--rounded-sm);
+  padding: 4px 10px;
+  border-right: 2px solid var(--surface);
+}
+.strip-seg.morning { background: var(--morning); color: var(--morning-ink); }
+.strip-seg.afternoon { background: var(--afternoon); color: var(--afternoon-ink); }
+.strip-seg.evening { background: var(--evening); color: var(--evening-ink); }
+.strip-seg:not(.is-now) { opacity: 0.75; }
+.strip-label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
+.strip-label svg { width: 14px; height: 14px; }
+
+.strip-now { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--primary); border-radius: 1px; z-index: 2; }
+.strip-now span {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, -2px);
+  padding: 0 6px;
+  border-radius: var(--rounded-full);
+  background: var(--primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  display: none;
+}
+
+.strip-dot {
+  position: absolute;
+  bottom: 6px;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  z-index: 3;
+  box-shadow: 0 0 0 2px var(--surface);
+  transition: transform .15s;
+}
+.strip-dot:hover, .strip-dot:focus-visible { transform: scale(1.25); }
+.strip-dot.step { background: var(--tertiary); }
+.strip-dot.own { background: var(--surface); border: 2px solid #9AA1AC; }
+.strip-dot.done { background: var(--secondary); border: 0; color: #fff; }
+.strip-dot.done svg { width: 10px; height: 10px; stroke-width: 3; }
+.strip-dot.own:not(.done) { cursor: default; }
+
+.strip-ticks { position: relative; height: 18px; margin-top: 4px; }
+.strip-tick { position: absolute; transform: translateX(-50%); color: #898781; font-size: 11px; white-space: nowrap; }
+.strip-tick:first-child { transform: none; }
+.strip-tick:last-child { transform: translateX(-100%); }
 
 /* ---------- Buttons ---------- */
 
@@ -261,6 +358,7 @@ button.plan-title:hover { color: var(--tertiary); }
 .plan-item.is-done .plan-title { color: var(--secondary); font-weight: 400; text-decoration: line-through; }
 
 .plan-why { margin-top: 4px; color: var(--secondary); font-size: 14px; }
+.step-in .avatar.tiny { margin: 0 5px 0 -5px; vertical-align: -4px; }
 .step-in {
   display: inline-block;
   margin-right: var(--space-sm);
@@ -301,9 +399,12 @@ button.plan-title:hover { color: var(--tertiary); }
   border-radius: var(--rounded-md);
   transition: border-color .15s;
 }
-.team-tile:hover { border-color: var(--tertiary); }
+.team-tile { border-top: 3px solid var(--pc, var(--border)); }
+.team-tile:hover { border-color: var(--pc, var(--tertiary)); }
 .team-tile .person-name { font-size: 15px; font-weight: 600; }
 .tile-next { flex: 1; font-size: 14px; }
+.tile-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); }
+.tile-trend { display: inline-flex; align-items: center; gap: 8px; }
 
 /* ---------- Team page ---------- */
 
@@ -533,6 +634,22 @@ a.owner:hover { color: var(--tertiary); }
 @keyframes fade-in { from { opacity: 0; } }
 @keyframes slide-in { from { transform: translateX(24px); opacity: 0; } }
 
+/* ---------- Shorter laptop screens: tighten Top priorities so it still fits ---------- */
+
+@media (max-height: 860px) and (min-width: 961px) {
+  #page-today { gap: var(--space-md); }
+  #page-today .page-grid, #page-today .stack { gap: var(--space-md); }
+  #page-today .card { padding: 16px 20px; }
+  #page-today .day-strip-card { padding: 8px 20px 2px; }
+  .strip-ticks { margin-top: 2px; }
+  #page-today .page-head .page-sub { margin-top: 2px; }
+  #page-today .plan-item { padding: 10px var(--space-sm); }
+  #page-today .plan-item.quiet { padding: 6px 0; }
+  #page-today .part-label { margin-top: 10px; }
+  .team-tile { padding: 12px var(--space-md); gap: 6px; }
+  .tile-next { display: none; }
+}
+
 /* ---------- Smaller screens: stack and let the page scroll ---------- */
 
 @media (max-width: 960px) {
@@ -565,6 +682,11 @@ a.owner:hover { color: var(--tertiary); }
   .plan-item { gap: 10px; }
   .plan-time { font-size: 13px; }
   .team-grid, .kpi-row { grid-template-columns: 1fr; }
+  .today-head { flex-direction: column; align-items: stretch; gap: var(--space-md); }
+  .day-progress { width: auto; }
+  .strip-label { font-size: 0; gap: 0; }
+  .strip-seg { padding: 4px 6px; }
+  .strip-tick:nth-child(even) { display: none; }
   .work-table .col-owner, .work-table .col-due, .work-table .col-eng { display: none; }
 }
 

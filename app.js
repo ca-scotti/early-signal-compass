@@ -21,7 +21,12 @@ const ICONS = {
   x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
   arrowRight: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
   chart: '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+  sunrise: '<path d="M12 2v8"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m8 6 4-4 4 4"/><path d="M16 18a4 4 0 0 0-8 0"/>',
+  moon: '<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>',
 };
+
+/* Each part of the day has its own icon and soft color (see DESIGN.md). */
+const PART_ICON = { morning: "sunrise", afternoon: "sun", evening: "moon" };
 
 function icon(name) {
   return `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
@@ -58,7 +63,11 @@ const engagement = (name) => ENGAGEMENTS.find((e) => e.name === name) || { name,
 
 const dot = (name) => `<span class="dot ${engagement(name).dot === "harbor" ? "harbor" : ""}"></span>`;
 const badge = (status) => `<span class="badge ${status}">${STATUS_LABEL[status]}</span>`;
-const avatar = (ownerId, size = "") => `<span class="avatar ${size}">${escapeHtml(person(ownerId).initials)}</span>`;
+/* Team members' avatars wear their own chart color (PERSON_COLOR in data.js). */
+const avatar = (ownerId, size = "") => {
+  const c = typeof PERSON_COLOR !== "undefined" && PERSON_COLOR[ownerId];
+  return `<span class="avatar ${size} ${c ? "person" : ""}" ${c ? `style="--pc:${c}"` : ""}>${escapeHtml(person(ownerId).initials)}</span>`;
+};
 const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
 function dueLabel(c) {
@@ -115,7 +124,7 @@ function planItem(p, quiet = false) {
     : `<span class="plan-title">${escapeHtml(p.title)}</span>`;
   let second = "";
   if (!done && !quiet) {
-    if (c) second = `<p class="plan-why"><span class="step-in">Step in</span>Why now: ${escapeHtml(c.reason)}</p>`;
+    if (c) second = `<p class="plan-why"><span class="step-in">${avatar(c.owner, "tiny")}Step in</span>Why now: ${escapeHtml(c.reason)}</p>`;
     else if (p.note) second = `<p class="plan-why meta">${escapeHtml(p.note)}</p>`;
   }
   const inlineTag = !done && quiet && c ? `<span class="step-in inline">Step in</span>` : "";
@@ -143,6 +152,19 @@ function renderToday() {
 
   $("greeting").textContent = `Good morning, ${SETTINGS.leadName} · ${SETTINGS.today} · ${clock(SETTINGS.now)}`;
   $("now-heading").textContent = PART_TITLE[part.id] || part.name;
+  $("now-chip").className = `part-chip ${part.id}`;
+  $("now-chip").innerHTML = icon(PART_ICON[part.id] || "sun");
+
+  // Done today: a number and a meter
+  const doneCount = TODAY_PLAN.filter((p) => state.done.has(p.id)).length;
+  const steps = TODAY_PLAN.filter((p) => p.commitment);
+  const stepsDone = steps.filter((p) => state.done.has(p.id)).length;
+  $("day-progress").innerHTML = `
+    <div class="dp-top"><span class="dp-num">${doneCount}</span><span class="meta">of ${TODAY_PLAN.length} done today</span></div>
+    <div class="meter" role="img" aria-label="${doneCount} of ${TODAY_PLAN.length} done"><span style="width:${pct(doneCount, TODAY_PLAN.length)}%"></span></div>
+    <div class="meta">${stepsDone} of ${steps.length} step-ins</div>`;
+
+  renderStrip(part);
   $("now-pace").textContent = paceLine(part, nowItems);
   $("now-list").innerHTML =
     (open.map((p) => planItem(p)).join("") || `<li class="empty meta">Nothing left for ${part.name.toLowerCase()}.</li>`) +
@@ -152,7 +174,7 @@ function renderToday() {
     const items = TODAY_PLAN.filter((p) => p.part === d.id).sort(byTime);
     if (!items.length) return "";
     return `
-      <h3 class="part-label">${d.name} <span class="meta">from ${clock(d.start)}</span></h3>
+      <h3 class="part-label"><span class="part-chip small ${d.id}">${icon(PART_ICON[d.id] || "sun")}</span>${d.name} <span class="meta">from ${clock(d.start)}</span></h3>
       <ul class="plan-list">${items.map((p) => planItem(p, true)).join("")}</ul>`;
   }).join("");
   $("later-list").innerHTML = later || `<p class="empty meta">Nothing else today.</p>`;
@@ -160,16 +182,62 @@ function renderToday() {
   $("team-tiles").innerHTML = TEAM.map((p) => {
     const steps = TODAY_PLAN.filter((t) => t.commitment && byId(t.commitment)?.owner === p.id && !state.done.has(t.id)).sort(byTime);
     const next = steps[0];
+    const trend = HISTORY.team[p.id] ? onTimeSeries(p.id) : null;
     return `
-      <a class="team-tile" href="#/team/${encodeURIComponent(p.id)}">
+      <a class="team-tile" href="#/team/${encodeURIComponent(p.id)}" style="--pc:${colorOf(p.id)}">
         <div class="member-top">${avatar(p.id)}<div>
           <div class="person-name">${escapeHtml(p.fullName)}</div>
           <div class="meta">${steps.length ? plural(steps.length, "step-in") + " today" : "No step-ins today"} · ${COMMITMENTS.filter((c) => c.owner === p.id && dueThisWeek(c)).length} due this week</div>
         </div></div>
         <p class="tile-next">${next ? `Next: ${escapeHtml(next.title)} <span class="meta">· ${clock(next.by)}</span>` : escapeHtml(p.note)}</p>
-        <span class="member-open">Open details ${icon("arrowRight")}</span>
+        <div class="tile-foot">
+          ${trend ? `<span class="tile-trend">${Viz.spark(trend, { color: colorOf(p.id), width: 72, height: 24 })}<span class="meta">On time ${trend[trend.length - 1]}%</span></span>` : ""}
+          <span class="member-open">Open ${icon("arrowRight")}</span>
+        </div>
       </a>`;
   }).join("");
+}
+
+/* The day at a glance: 8 am to 8 pm in three tinted parts, a "now" line,
+   and every to-do as a dot at its time. Step-ins are indigo, the lead's own
+   tasks are white, done items carry a check. Hover a dot to see it; click a
+   step-in to open it. */
+function renderStrip(nowPart) {
+  const start = minutes(DAY_PARTS[0].start), end = minutes(DAY_PARTS[DAY_PARTS.length - 1].end);
+  const pos = (m) => Math.max(0, Math.min(100, ((m - start) / (end - start)) * 100));
+  const segs = DAY_PARTS.map((d) => `
+    <div class="strip-seg ${d.id} ${d === nowPart ? "is-now" : ""}" style="left:${pos(minutes(d.start))}%;width:${pos(minutes(d.end)) - pos(minutes(d.start))}%">
+      <span class="strip-label">${icon(PART_ICON[d.id] || "sun")}${d.name}</span>
+    </div>`).join("");
+  const ticks = [];
+  for (let m = start; m <= end; m += 120) ticks.push(`<span class="strip-tick" style="left:${pos(m)}%">${clock(`${Math.floor(m / 60)}:${String(m % 60).padStart(2, "0")}`)}</span>`);
+  const dots = TODAY_PLAN.map((p) => {
+    const done = state.done.has(p.id);
+    const c = p.commitment ? byId(p.commitment) : null;
+    return `<button class="strip-dot ${c ? "step" : "own"} ${done ? "done" : ""}" style="left:${pos(minutes(p.by))}%"
+      data-dot="${p.id}" ${c ? `data-open="${c.id}"` : ""} aria-label="${escapeHtml(p.title)}, by ${clock(p.by)}${done ? ", done" : ""}">${done ? icon("check") : ""}</button>`;
+  }).join("");
+  const strip = $("day-strip");
+  strip.innerHTML = `
+    <div class="strip-track">${segs}
+      <div class="strip-now" style="left:${pos(NOW)}%"><span>Now · ${clock(SETTINGS.now)}</span></div>
+      ${dots}
+    </div>
+    <div class="strip-ticks">${ticks.join("")}</div>`;
+
+  strip.querySelectorAll(".strip-dot").forEach((b) => {
+    const p = TODAY_PLAN.find((t) => t.id === b.dataset.dot);
+    const c = p.commitment ? byId(p.commitment) : null;
+    const tip = () => {
+      const r = b.getBoundingClientRect();
+      Viz.showTip(r.left + r.width / 2, r.top, `${clock(p.by)} · ${state.done.has(p.id) ? "Done" : c ? "Step in" : "Your task"}`,
+        [{ color: c ? "#3B5BDB" : "#B8BDC5", name: p.title, value: "", shape: "rect" }]);
+    };
+    b.addEventListener("pointerenter", tip);
+    b.addEventListener("focus", tip);
+    b.addEventListener("pointerleave", Viz.hideTip);
+    b.addEventListener("blur", Viz.hideTip);
+  });
 }
 
 /* ---------- Page: Team ---------- */

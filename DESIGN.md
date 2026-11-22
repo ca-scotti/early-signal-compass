@@ -138,8 +138,10 @@ Guiding principles:
 - **Show the reason, hide the record.** A row shows what to do, when, and why
   now. A commitment's due date, owner, source and progress live in the side
   panel and on the team member's page.
-- **Calm by default.** Ink on white and grey. Indigo means "act here". Status
-  colors appear only in the All commitments table.
+- **Colorful, but every color means something.** Indigo means "act here".
+  Each part of the day has its own soft tint (morning sky, afternoon peach,
+  evening lavender) and each team member has their own color. Status colors
+  appear only in the All commitments table.
 - **Progress is shown as trends, kindly.** Charts show how the lead and each
   analyst are doing over the last six weeks (on time, step-ins, flagged work
   caught early). They describe the work, not grade the person: no scores,
@@ -160,6 +162,18 @@ The palette is light, neutral and quiet, with one action color.
   full commitments table, always with a word.
 - **Engagement dots:** an 8px dot that tells engagements apart, used only in
   the side panel.
+
+### Day and people colors
+
+- **Parts of the day:** morning `#E7F5FF` with `#1C7ED6` icons (sunrise),
+  afternoon `#FFF4E6` with `#E8590C` icons (sun), evening `#F3F0FF` with
+  `#7048E8` icons (moon). Used for the day timeline, the part chip next to
+  "This morning" and the "Later today" labels. They tell the parts apart;
+  they never mean good or bad.
+- **People:** each team member's avatar is a soft tint of their chart color
+  (Priya blue, Marcus orange) with darker initials, everywhere they appear:
+  step-in tags, team tiles (with a 3px top edge in their color), the table and
+  the side panel. The lead's own avatar stays grey.
 
 ### Chart colors
 
@@ -195,7 +209,9 @@ Avoid uppercase labels and monospace text. Both make the page feel busier.
   link per team member under it), All commitments, and the lead's profile.
 - The app fills the window. Each page is a header (28px title and one line)
   and cards that stretch to the bottom of the window.
-- **Top priorities:** two columns (3:2). Left: "Right now" and "Your team
+- **Top priorities:** a header with "This morning" on the left and a "done
+  today" meter on the right; the day timeline across the full width; then
+  two columns (3:2). Left: "Right now" and "Your team
   today" (one tile per person, linking to their page). Right: "Later today".
 - **Team:** one card per person, side by side, each linking to their page.
 - **Team member:** two columns (3:2). Left: "Step in today" and "By
@@ -223,6 +239,12 @@ row in the card has a 3px indigo edge on the left.
 
 ## Components
 
+- **Day timeline:** 8 am to 8 pm in three tinted parts with their icon and
+  name, a dark "now" line, and each to-do as a 16px dot at its time: indigo
+  for a step-in, white with a grey ring for the lead's own task, grey with a
+  check when done. Hover or focus shows the item; clicking a step-in opens it.
+- **Done today:** the count (28px), "of N done today", a blue meter on a light
+  blue track, and "N of N step-ins".
 - **Now heading:** "This morning" (or afternoon, evening) in display type, then
   one line: "Until 12 pm · 1 past its time", "On track" or "All done".
 - **Plan row:** a checkbox, the title, and one time on the right ("1 pm"). A
