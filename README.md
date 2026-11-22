@@ -29,7 +29,7 @@ If something breaks, open the file's **History** and revert your last commit.
 
 Words and counts on the page, such as "This morning", "1 past its time" and "3 due this week", are calculated from `data.js`. You don't need to update them by hand.
 
-**If a change doesn't show up:** browsers keep files for up to 10 minutes. To push a change to everyone right away, open `index.html` and raise the number in `?v=10` (on the `styles.css`, `data.js`, `charts.js` and `app.js` lines) to `?v=11`, and so on.
+**If a change doesn't show up:** browsers keep files for up to 10 minutes. To push a change to everyone right away, open `index.html` and raise the number in `?v=11` (on the `styles.css`, `data.js`, `charts.js` and `app.js` lines) to `?v=12`, and so on.
 
 ## Previewing a change before it goes live (optional)
 

@@ -18,9 +18,12 @@ colors:
   success: "#067647"
   success-soft: "#DCFAE6"
   muted: "#8A857B"
-  morning: "#FBF7EE"
-  afternoon: "#F5ECDB"
-  evening: "#ECE3D3"
+  morning: "#FCEFE3"
+  morning-ink: "#A4582A"
+  afternoon: "#E6F0F8"
+  afternoon-ink: "#3A6890"
+  evening: "#ECEAF8"
+  evening-ink: "#5550A8"
 typography:
   display:
     fontFamily: Source Serif 4
@@ -135,8 +138,8 @@ Guiding principles:
   now. A commitment's due date, owner, source and progress live in the side
   panel and on the team member's page.
 - **Warm, but with a strict color budget.** Ink, one indigo accent ("act
-  here"), and warm paper neutrals. The parts of the day are shades of one sand
-  color. Status colors appear only in the All commitments table.
+  here"), and warm paper neutrals. The parts of the day wear pale daylight
+  tints (dawn, midday, dusk). Status colors appear only in the All commitments table.
 - **Progress is shown as trends, kindly.** Charts show how the lead and each
   analyst are doing over the last six weeks (on time, step-ins, flagged work
   caught early). They describe the work, not grade the person: no scores,
@@ -156,10 +159,13 @@ identifies a line in a chart. See "Not vibe-coded" under Do's and Don'ts.
   nav item, the progress meter, and step-ins in the Progress charts.
 - **Warm paper (#F6F5F1) and white:** the page is paper; the few panels are
   white with a 1px hairline (#E6E3DC).
-- **Parts of the day:** three shades of one warm sand, light to deep, like
-  daylight moving: morning #FBF7EE, afternoon #F5ECDB, evening #ECE3D3. Used
-  for the timeline segments and the list headers. They tell the parts apart;
-  they never mean good or bad.
+- **Parts of the day: daylight colors.** Three pale tints at the same
+  lightness, so none shouts: **dawn apricot** for morning (#FCEFE3, icon and
+  label #A4582A), **midday sky** for afternoon (#E6F0F8, #3A6890) and **dusk
+  lavender** for evening (#ECEAF8, #5550A8, a cousin of the indigo accent).
+  Used for the timeline segments and the list headers. All icon colors and
+  text clear 4.5:1 on their tint. They mark time of day only; they never mean
+  good or bad.
 - **Status colors** (warning, danger, success) appear only as labeled badges in
   the All commitments table, and as "▲ / ▼ … vs week before" change words.
 - **No decorative color:** no engagement dots, no colored side or top edges,
@@ -235,15 +241,15 @@ row in the card has a 3px indigo edge on the left.
 
 ## Components
 
-- **Day timeline:** sits on the page (no box). 8 am to 8 pm in three sand
-  shades with a small icon and name, an ink "now" line, and each to-do as a
+- **Day timeline:** sits on the page (no box). 8 am to 8 pm in the three
+  daylight tints with a small icon and name in their deeper shade, an ink "now" line, and each to-do as a
   14px dot at its time: indigo for a step-in, white with a grey ring for the
   lead's own task, grey with a check when done. A key under it explains every
   dot. Hover or focus shows the item; clicking a step-in opens it.
 - **Done today:** the count (28px), "of N done today", a blue meter on a light
   blue track, and "N of N step-ins".
 - **Part-of-day lists:** one white panel split into three columns by
-  hairlines. Each column has a sand-tinted header (icon, serif name, an indigo
+  hairlines. Each column has a daylight-tinted header (icon, serif name, an indigo
   "Now" label if current, time range and status, done count like "1/3"), then
   its plan rows. In parts that aren't current, titles are 500 weight and the
   reason is cut to one line. No colored edges.
@@ -286,7 +292,8 @@ row in the card has a 3px indigo edge on the left.
 From "7 Signs a UI Has Been Vibe Coded" (The Fountain Institute), and how
 this app answers each:
 
-1. **Competing colors** → one dominant, one accent, one neutral family.
+1. **Competing colors** → one dominant, one accent, one neutral family; the
+   daylight tints are pale, equally light, and only mark time of day.
 2. **Decorative glow** → none; emphasis comes from type and the "Now" label.
 3. **Emojis as icons** → one consistent line-icon set (Lucide), 16px.
 4. **Trendy gradients** → none; flat fills only.
