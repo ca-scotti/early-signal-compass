@@ -147,13 +147,13 @@ function renderToday() {
   // Right now: this part of the day, plus anything left over from earlier parts.
   // Unfinished first, in time order; done items at the bottom.
   const nowItems = TODAY_PLAN.filter((p) => p.part === part.id || (earlierIds.includes(p.part) && !state.done.has(p.id)));
-  const open = nowItems.filter((p) => !state.done.has(p.id)).sort(byTime);
-  const finished = nowItems.filter((p) => state.done.has(p.id)).sort(byTime);
 
   $("greeting").textContent = `Good morning, ${SETTINGS.leadName} · ${SETTINGS.today} · ${clock(SETTINGS.now)}`;
-  $("now-heading").textContent = PART_TITLE[part.id] || part.name;
+  $("now-heading").textContent = "Your day";
   $("now-chip").className = `part-chip ${part.id}`;
   $("now-chip").innerHTML = icon(PART_ICON[part.id] || "sun");
+  const left = TODAY_PLAN.filter((p) => !state.done.has(p.id));
+  const leftSteps = left.filter((p) => p.commitment).length;
 
   // Done today: a number and a meter
   const doneCount = TODAY_PLAN.filter((p) => state.done.has(p.id)).length;
@@ -165,35 +165,49 @@ function renderToday() {
     <div class="meta">${stepsDone} of ${steps.length} step-ins</div>`;
 
   renderStrip(part);
-  $("now-pace").textContent = paceLine(part, nowItems);
-  $("now-list").innerHTML =
-    (open.map((p) => planItem(p)).join("") || `<li class="empty meta">Nothing left for ${part.name.toLowerCase()}.</li>`) +
-    finished.map((p) => planItem(p)).join("");
-
-  const later = DAY_PARTS.slice(partIndex + 1).map((d) => {
-    const items = TODAY_PLAN.filter((p) => p.part === d.id).sort(byTime);
-    if (!items.length) return "";
+  $("now-pace").textContent = left.length
+    ? `${plural(left.length, "thing")} left today, ${plural(leftSteps, "step-in")} · ${PART_TITLE[part.id] || part.name}: ${paceLine(part, nowItems).replace(/^Until [^·]+· /, "").toLowerCase()}`
+    : "Everything on today's plan is done.";
+  // Three colored lists, one per part of the day. In each: unfinished items
+  // in time order, done ones at the bottom. The current part is highlighted.
+  $("parts").innerHTML = DAY_PARTS.map((d, i) => {
+    const items = TODAY_PLAN.filter((p) => p.part === d.id);
+    const open = items.filter((p) => !state.done.has(p.id)).sort(byTime);
+    const finished = items.filter((p) => state.done.has(p.id)).sort(byTime);
+    const isNow = d === part;
+    const status = isNow ? paceLine(d, items).replace(/^Until [^·]+· /, "")
+      : i < partIndex ? (open.length ? `${open.length} left over` : "All done")
+      : `Starts at ${clock(d.start)}`;
     return `
-      <h3 class="part-label"><span class="part-chip small ${d.id}">${icon(PART_ICON[d.id] || "sun")}</span>${d.name} <span class="meta">from ${clock(d.start)}</span></h3>
-      <ul class="plan-list">${items.map((p) => planItem(p, true)).join("")}</ul>`;
+      <section class="part-card ${d.id} ${isNow ? "is-now" : ""}" aria-labelledby="part-${d.id}">
+        <header class="part-head">
+          <span class="part-chip ${d.id}">${icon(PART_ICON[d.id] || "sun")}</span>
+          <div>
+            <h2 id="part-${d.id}">${d.name}${isNow ? ` <span class="now-pill">Now</span>` : ""}</h2>
+            <div class="meta">${clock(d.start)}–${clock(d.end)} · ${status}</div>
+          </div>
+          <span class="part-count">${finished.length}/${items.length}</span>
+        </header>
+        <ul class="plan-list scroll">
+          ${open.map((p) => planItem(p)).join("") || `<li class="empty meta">Nothing left for the ${d.name.toLowerCase()}.</li>`}
+          ${finished.map((p) => planItem(p)).join("")}
+        </ul>
+      </section>`;
   }).join("");
-  $("later-list").innerHTML = later || `<p class="empty meta">Nothing else today.</p>`;
 
   $("team-tiles").innerHTML = TEAM.map((p) => {
     const steps = TODAY_PLAN.filter((t) => t.commitment && byId(t.commitment)?.owner === p.id && !state.done.has(t.id)).sort(byTime);
     const next = steps[0];
     const trend = HISTORY.team[p.id] ? onTimeSeries(p.id) : null;
     return `
-      <a class="team-tile" href="#/team/${encodeURIComponent(p.id)}" style="--pc:${colorOf(p.id)}">
-        <div class="member-top">${avatar(p.id)}<div>
+      <a class="team-chip" href="#/team/${encodeURIComponent(p.id)}" style="--pc:${colorOf(p.id)}">
+        ${avatar(p.id)}
+        <div class="team-chip-text">
           <div class="person-name">${escapeHtml(p.fullName)}</div>
-          <div class="meta">${steps.length ? plural(steps.length, "step-in") + " today" : "No step-ins today"} · ${COMMITMENTS.filter((c) => c.owner === p.id && dueThisWeek(c)).length} due this week</div>
-        </div></div>
-        <p class="tile-next">${next ? `Next: ${escapeHtml(next.title)} <span class="meta">· ${clock(next.by)}</span>` : escapeHtml(p.note)}</p>
-        <div class="tile-foot">
-          ${trend ? `<span class="tile-trend">${Viz.spark(trend, { color: colorOf(p.id), width: 72, height: 24 })}<span class="meta">On time ${trend[trend.length - 1]}%</span></span>` : ""}
-          <span class="member-open">Open ${icon("arrowRight")}</span>
+          <div class="meta">${steps.length ? `${plural(steps.length, "step-in")} today${next ? `, next ${clock(next.by)}` : ""}` : "No step-ins today"}</div>
         </div>
+        ${trend ? `<span class="tile-trend">${Viz.spark(trend, { color: colorOf(p.id), width: 64, height: 22 })}<span class="meta">On time ${trend[trend.length - 1]}%</span></span>` : ""}
+        ${icon("arrowRight")}
       </a>`;
   }).join("");
 }

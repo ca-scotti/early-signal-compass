@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="styles.css?v=8">
+  <link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
   <div class="app">
@@ -58,22 +58,10 @@
         <div class="card day-strip-card">
           <div class="day-strip" id="day-strip" aria-label="Today's plan on a timeline"></div>
         </div>
-        <div class="page-grid today-grid">
-          <div class="stack">
-            <div class="card">
-              <h2 class="card-title">Right now</h2>
-              <ul class="plan-list" id="now-list"></ul>
-            </div>
-            <div class="card fill">
-              <h2 class="card-title">Your team today</h2>
-              <div class="team-tiles" id="team-tiles"></div>
-            </div>
-          </div>
-          <div class="card fill">
-            <h2 class="card-title">Later today</h2>
-            <div class="scroll" id="later-list"></div>
-          </div>
-        </div>
+        <!-- The day as three colored lists: morning, afternoon, evening -->
+        <div class="page-grid parts-grid" id="parts"></div>
+        <!-- The team, in one slim row -->
+        <div class="team-row" id="team-tiles" aria-label="Your team today"></div>
       </section>
 
       <!-- Team: one card per person -->
@@ -185,8 +173,8 @@
   <div class="sheet-overlay" id="sheet-overlay" hidden></div>
   <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden></div>
 
-  <script src="data.js?v=8"></script>
-  <script src="charts.js?v=8"></script>
-  <script src="app.js?v=8"></script>
+  <script src="data.js?v=9"></script>
+  <script src="charts.js?v=9"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>

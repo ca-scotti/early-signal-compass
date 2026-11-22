@@ -125,10 +125,10 @@ Guiding principles:
 - **Pages, not a long scroll.** The app has five pages: Top priorities, Team,
   one page per team member, Progress, and All commitments. Each page fills the window
   and fits without scrolling on a laptop (1366×768 and up).
-- **Right now first.** On Top priorities, the largest thing on the screen is
-  the current part of the day ("This morning"), with its unfinished items in
-  time order and done items at the bottom. Leftovers from an earlier part of
-  the day join it.
+- **The whole day, the current part highlighted.** Top priorities shows
+  the day as three colored lists (morning, afternoon, evening). The part we
+  are in now carries a "Now" tag and a soft colored ring; inside each list,
+  unfinished items come first in time order and done ones go to the bottom.
 - **A sequence, not a status board.** In interviews, a grid of warnings felt
   "too much". The day reads top to bottom, like the day.
 - **Stepping in is an action, never a status flag.** Work that may slip shows
@@ -209,10 +209,10 @@ Avoid uppercase labels and monospace text. Both make the page feel busier.
   link per team member under it), All commitments, and the lead's profile.
 - The app fills the window. Each page is a header (28px title and one line)
   and cards that stretch to the bottom of the window.
-- **Top priorities:** a header with "This morning" on the left and a "done
-  today" meter on the right; the day timeline across the full width; then
-  two columns (3:2). Left: "Right now" and "Your team
-  today" (one tile per person, linking to their page). Right: "Later today".
+- **Top priorities:** a header ("Your day" with the current part's icon, one
+  summary line, and a "done today" meter on the right); the day timeline
+  across the full width; then three colored lists side by side, **Morning,
+  Afternoon, Evening**; then one slim row with a chip per team member.
 - **Team:** one card per person, side by side, each linking to their page.
 - **Team member:** two columns (3:2). Left: "Step in today" and "By
   engagement". Right: all of their commitments.
@@ -245,17 +245,20 @@ row in the card has a 3px indigo edge on the left.
   check when done. Hover or focus shows the item; clicking a step-in opens it.
 - **Done today:** the count (28px), "of N done today", a blue meter on a light
   blue track, and "N of N step-ins".
-- **Now heading:** "This morning" (or afternoon, evening) in display type, then
-  one line: "Until 12 pm · 1 past its time", "On track" or "All done".
+- **Part-of-day list:** a card with a 4px top edge in the part's ink color,
+  a tinted header (icon chip, name, "Now" tag if current, time range and
+  status such as "1 past its time" or "Starts at 12 pm", and a done count like
+  "1/3"), then its plan rows. In parts that aren't current, titles are 500
+  weight and "Why now" is cut to one line.
 - **Plan row:** a checkbox, the title, and one time on the right ("1 pm"). A
   late time reads "Past 9:30 am" in bold ink. At most one more line: for a
   step-in row, the "Step in" tag and "Why now: …"; for the lead's own task, a
   short note. Done rows are struck through and lose the second line. A step-in
   title opens the side panel.
-- **Later row:** the same row, quieter (14px/500): title, time, and the
-  "Step in" tag inline after the title.
-- **Team tile (Top priorities):** avatar, name, "N step-ins today · N due this
-  week", the next step-in with its time, and "Open details".
+
+- **Team chip (Top priorities):** a slim card with a 4px left edge in the
+  person's color: avatar, name, "N step-ins today, next 1 pm", their on-time
+  sparkline and value, and an arrow to their page.
 - **Team member card (Team):** large avatar, name, role and engagements; three
   numbers in words (commitments, due this week, need you); a one-line note;
   "Step in today" and "Needs you this week" lists; "Open details".

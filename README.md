@@ -1,6 +1,6 @@
 # Ahead — Early Signal Compass
 
-Interview prototype: a team lead's day plan, in five pages. **Top priorities** shows what's left right now ("This morning"), with moments to step in on an analyst's work marked "Step in", plus later today. **Team** has a card per person, and each person has their own details page. **Progress** has charts on how you and each person are doing over the last six weeks. **All commitments** lists everything with filters. This is Phase 1 of the roadmap.
+Interview prototype: a team lead's day plan, in five pages. **Top priorities** shows your day as three colored lists (morning, afternoon, evening) under a day timeline, with moments to step in on an analyst's work marked "Step in". **Team** has a card per person, and each person has their own details page. **Progress** has charts on how you and each person are doing over the last six weeks. **All commitments** lists everything with filters. This is Phase 1 of the roadmap.
 
 **Live site:** https://ca-scotti.github.io/early-signal-compass/
 
@@ -29,7 +29,7 @@ If something breaks, open the file's **History** and revert your last commit.
 
 Words and counts on the page, such as "This morning", "1 past its time" and "3 due this week", are calculated from `data.js`. You don't need to update them by hand.
 
-**If a change doesn't show up:** browsers keep files for up to 10 minutes. To push a change to everyone right away, open `index.html` and raise the number in `?v=8` (on the `styles.css`, `data.js`, `charts.js` and `app.js` lines) to `?v=9`, and so on.
+**If a change doesn't show up:** browsers keep files for up to 10 minutes. To push a change to everyone right away, open `index.html` and raise the number in `?v=9` (on the `styles.css`, `data.js`, `charts.js` and `app.js` lines) to `?v=10`, and so on.
 
 ## Previewing a change before it goes live (optional)
 
