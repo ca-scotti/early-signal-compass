@@ -1,6 +1,6 @@
 # Ahead — Early Signal Compass
 
-Interview prototype: a team lead's end-of-day plan. The first screen lists what must be done today, in order (morning, afternoon, evening), with check-ins on at-risk work slotted in and an "ahead or behind" word for each part of the day. This is Phase 1 of the roadmap.
+Interview prototype: a team lead's day plan. The first screen shows what's left right now ("This morning"), in time order, with moments to step in on an analyst's work marked "Step in". Later today and the team follow below. This is Phase 1 of the roadmap.
 
 **Live site:** https://ca-scotti.github.io/early-signal-compass/
 
@@ -26,9 +26,9 @@ If something breaks, open the file's **History** and revert your last commit.
 | `index.html` | The page skeleton: headings and section labels | Renaming a section or moving one around |
 | `app.js` | How the page behaves: clicks, the side panel, filters, counts | Changing interactions |
 
-Counts and words on the page, such as "4 at risk", "Eight things left to finish by end of day", "Behind by 1" and the per-person workload, are calculated from `data.js`. You don't need to update them by hand.
+Words and counts on the page, such as "This morning", "1 past its time" and "3 due this week", are calculated from `data.js`. You don't need to update them by hand.
 
-**If a change doesn't show up:** browsers keep files for up to 10 minutes. To push a change to everyone right away, open `index.html` and raise the number in `?v=4` (on the `styles.css`, `data.js` and `app.js` lines) to `?v=5`, and so on.
+**If a change doesn't show up:** browsers keep files for up to 10 minutes. To push a change to everyone right away, open `index.html` and raise the number in `?v=5` (on the `styles.css`, `data.js` and `app.js` lines) to `?v=6`, and so on.
 
 ## Previewing a change before it goes live (optional)
 

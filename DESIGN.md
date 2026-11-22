@@ -115,102 +115,103 @@ components:
 
 ## Overview
 
-Ahead is read once, first thing in the morning, by a team lead who has a few
-minutes. The interface should feel like a calm briefing, not a dashboard.
-Every screen answers one question first: *what do I need to get done by end
-of day, and am I ahead or behind?* Everything else is one click away, never on
-the first screen.
+Ahead is opened by a new team lead who has just been given one or two analysts
+and wants her day first. The interface should feel like a calm, short list,
+not a dashboard. The first screen answers one question: *what do I do right
+now, and when should I step in?* Everything else is below it or one click away.
 
 Guiding principles:
 
-- **One focus per screen.** The "By end of day" plan is the hero: the lead's
-  day in order, split into morning, afternoon and evening, with check-ins on
-  at-risk work slotted in. The team summary supports it, and the full list
-  stays collapsed until asked for.
+- **Right now first.** The largest thing on the screen is the current part of
+  the day ("This morning"), with its unfinished items in time order and done
+  items at the bottom. Leftovers from an earlier part of the day join it.
 - **A sequence, not a grid.** In interviews, a grid of warnings felt "too
-  much". The plan reads top to bottom, like the day.
-- **Warnings are actions.** An at-risk commitment shows up as a check-in on the
-  plan ("15-min check-in with Priya"), not as a status card.
-- **Show the reason, hide the record.** A row shows what's wrong and when it's
-  due. The source, excerpt, progress and next step live in the side panel.
-- **Calm by default.** Color is reserved for status. Everything else is ink on
-  white.
+  much". One centred column reads top to bottom, like the day.
+- **Stepping in is an action, never a status flag.** Work that may slip shows
+  up as a row the lead acts on ("15-min check-in with Priya"), marked with an
+  indigo "Step in" tag and a "Why now" line. No "At risk" or "Overdue" badges,
+  and no red, on the day plan.
+- **Show the reason, hide the record.** A row shows what to do, when, and why
+  now. The commitment's due date, owner, source and progress live in the side
+  panel.
+- **Calm by default.** Ink on white and grey. Indigo means "act here". Status
+  colors appear only in the full commitments table, behind a click.
 
 ## Colors
 
-The palette is light, neutral and quiet, with one interaction color and three
-status colors.
+The palette is light, neutral and quiet, with one action color.
 
-- **Primary (#1F2328):** ink for headings and body text.
-- **Secondary (#5B6470):** slate for metadata: owners, engagements, dates.
-- **Tertiary (#3B5BDB):** indigo, the only color for interaction (buttons,
-  links, the active nav item). Never used for decoration.
-- **Neutral (#F6F7F9):** the page background, so white cards lift off it
-  without needing shadows.
-- **Status colors:** warning (at risk), danger (overdue) and success (on
-  track). Always pair the strong text color with its soft background, and
-  always add a word ("At risk"), never color alone.
-- **Engagement dots:** the only other color, kept to an 8px dot that tells
-  engagements apart.
+- **Primary (#1F2328):** ink for headings and body text, and for a late time
+  ("Past 9:30 am" in bold ink, not red).
+- **Secondary (#5B6470):** slate for metadata, notes and "Why now" text.
+- **Tertiary (#3B5BDB):** indigo, the only color for action: buttons, links,
+  the active nav item, the "Step in" tag and the edge of a step-in row.
+- **Neutral (#F6F7F9):** the page and sidebar background, so the one white
+  card lifts off it without shadows.
+- **Status colors:** warning, danger and success appear only as badges in the
+  full commitments table, always with a word.
+- **Engagement dots:** an 8px dot that tells engagements apart, used only in
+  the side panel.
 
 ## Typography
 
 Inter throughout, in five styles. Nothing on screen is smaller than 12px.
 
-- **Display (28px/600):** the greeting only.
-- **Title (16px/600):** section headings and commitment titles.
-- **Body (14px/400):** reasons and descriptions.
-- **Small (13px/400):** metadata lines.
-- **Label (12px/500):** badges, buttons and counts.
+- **Display (28px/600):** the current part of the day ("This morning"), and
+  nothing else.
+- **Title (16px/600):** section headings ("Later today", "Your team this week").
+  Plan titles are 15px/600 for now and 14px/500 for later.
+- **Body (14px/400):** "Why now" lines, times and notes.
+- **Small (13px/400):** metadata and the greeting line.
+- **Label (12px/500):** the "Step in" tag, buttons and table headers.
 
 Avoid uppercase labels and monospace text. Both make the page feel busier.
 
 ## Layout
 
-- A fixed 232px sidebar and a content column that tops out at 1080px.
-- Main area: a two-thirds/one-third grid. "By end of day" sits on the left
-  and "Your team" on the right. Below 960px it becomes a single column.
-- An 8px spacing rhythm: 16px inside list rows, 24px inside cards, 40px between
-  major sections.
-- The full commitments table is collapsed by default.
+- A 224px sidebar with the same grey as the page (no border), and one content
+  column of up to 720px.
+- Top to bottom: a quiet greeting line, "This morning" with one pace line,
+  the one white card, "Later today", "Your team this week", then the collapsed
+  "See all 12 commitments".
+- An 8px spacing rhythm: 14px inside plan rows, 40px between sections.
+- On phones the sidebar becomes a row of links and the time stays on the right
+  of each row.
 
 ## Elevation & Depth
 
-Flat. Cards are separated from the page by the neutral background and a 1px
-border, not shadows. Only the side panel gets a shadow, because it floats
-over content.
+Flat. The only card is the "right now" list, separated by a 1px border. Only
+the side panel gets a shadow, because it floats over content.
 
 ## Shapes
 
-Rounded but not soft: 14px for cards, 10px for list rows and the panel,
-6px for buttons and inputs, and fully round for status badges and avatars.
+Rounded but not soft: 14px for cards, 10px for the panel and selected rows,
+6px for buttons and inputs, and fully round for tags and avatars. A step-in
+row in the card has a 3px indigo edge on the left.
 
 ## Components
 
-- **Day part:** a heading with its time range ("Morning · 8 am–12 pm · now")
-  and one pace word on the right: "Behind by N" (warning badge), "Ahead by N"
-  or "On track" (success badge), "Done", or "Starts at …" (plain meta text
-  before it starts). Behind means not done and past its time; ahead means done
-  before its time.
-- **Plan item:** a checkbox, the action as the title, then one meta line. For a
-  check-in, the meta line is the commitment · owner · due label (danger color
-  when due within a day), with the status badge after the title and one line
-  of reason; the title opens the side panel. On the right: "By 1 pm", or "Was
-  due 9:30 am" in the danger color once it is late. Done items are struck
-  through and drop their badge and reason.
-- **Team member:** avatar, name, "N commitments · N due this week", and one
-  stacked status bar. No per-engagement breakdown on the first screen.
-- **Side panel:** title, a short fact grid, the reason, the original quote and
-  where the check-in sits on today's plan, with the primary button "Mark
-  check-in done".
-- **Buttons:** one primary button per view at most (in the side panel). In
-  lists, use the secondary button.
+- **Now heading:** "This morning" (or afternoon, evening) in display type, then
+  one line: "Until 12 pm · 1 past its time", "On track" or "All done".
+- **Plan row:** a checkbox, the title, and one time on the right ("1 pm"). A
+  late time reads "Past 9:30 am" in bold ink. At most one more line: for a
+  step-in row, the "Step in" tag and "Why now: …"; for the lead's own task, a
+  short note. Done rows are struck through and lose the second line. A step-in
+  title opens the side panel.
+- **Later row:** the same row, quieter (14px/500): title, time, and the
+  "Step in" tag inline after the title. No second line.
+- **Team line:** small avatar, name, "N due this week · one-line note". No
+  coloured bars.
+- **Side panel:** engagement, title, a fact grid (owner, due, status in words,
+  progress), a neutral "Why now" box, the original quote with its source, and
+  where it sits on today's plan, with the one primary button "Mark done".
+- **Buttons:** one primary button per view at most (in the side panel).
 
 ## Do's and Don'ts
 
-- **Do** lead with the day's plan in order, and keep counts in one place.
-- **Do** keep each row to two lines of text plus a badge.
-- **Don't** show the same number twice on one screen.
-- **Don't** add icons that only decorate. Use an icon only when it carries
-  meaning that text would make longer.
+- **Do** lead with what's left right now, in time order.
+- **Do** keep each row to a title, one time and at most one more line.
+- **Don't** show status badges, red or traffic-light colors on the day plan.
+- **Don't** show the same number twice on one screen, or two dates on one row.
+- **Don't** add icons that only decorate.
 - **Don't** go below 12px text or use color without a matching word.

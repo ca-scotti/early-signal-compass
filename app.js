@@ -73,18 +73,21 @@ const NOW = minutes(SETTINGS.now);
 const planFor = (commitmentId) => TODAY_PLAN.find((p) => p.commitment === commitmentId);
 const checkIns = () => TODAY_PLAN.filter((p) => p.commitment);
 
-/* How a part of the day is going: behind = not done and past its time,
-   ahead = done before its time. Always a word, never color alone. */
-function pace(part) {
-  const items = TODAY_PLAN.filter((p) => p.part === part.id);
-  const isDone = (p) => state.done.has(p.id);
-  if (minutes(part.start) > NOW && !items.some(isDone)) return { word: `Starts at ${clock(part.start)}`, tone: "" };
-  if (items.length && items.every(isDone)) return { word: "Done", tone: "on-track" };
-  const behind = items.filter((p) => !isDone(p) && minutes(p.by) <= NOW).length;
-  const ahead = items.filter((p) => isDone(p) && minutes(p.by) > NOW).length;
-  if (behind) return { word: `Behind by ${behind}`, tone: "at-risk" };
-  if (ahead) return { word: `Ahead by ${ahead}`, tone: "on-track" };
-  return { word: "On track", tone: "on-track" };
+/* The part of the day we are in now (or the nearest one outside working hours). */
+function currentPart() {
+  return DAY_PARTS.find((d) => minutes(d.start) <= NOW && NOW < minutes(d.end))
+    || (NOW < minutes(DAY_PARTS[0].start) ? DAY_PARTS[0] : DAY_PARTS[DAY_PARTS.length - 1]);
+}
+const PART_TITLE = { morning: "This morning", afternoon: "This afternoon", evening: "This evening" };
+
+/* How the current part of the day is going, in words (never color alone). */
+function paceLine(part, items) {
+  const open = items.filter((p) => !state.done.has(p.id));
+  const late = open.filter((p) => minutes(p.by) <= NOW).length;
+  const until = `Until ${clock(part.end)}`;
+  if (!open.length) return `${until} · All done`;
+  if (late) return `${until} · ${late} past ${late === 1 ? "its" : "their"} time`;
+  return `${until} · On track`;
 }
 
 /* ---------- Static text ---------- */
@@ -92,9 +95,6 @@ function pace(part) {
 function fillStatic() {
   document.querySelectorAll("[data-text]").forEach((el) => { el.textContent = SETTINGS[el.dataset.text] ?? ""; });
   document.querySelectorAll("[data-icon]").forEach((el) => { el.outerHTML = icon(el.dataset.icon); });
-
-  $("engagement-nav").innerHTML = ENGAGEMENTS.map((e) =>
-    `<button class="nav-item" data-nav="${escapeHtml(e.name)}">${dot(e.name)}${escapeHtml(e.name)}</button>`).join("");
 
   $("filter-engagement").innerHTML = `<option value="all">All engagements</option>` +
     ENGAGEMENTS.map((e) => `<option value="${escapeHtml(e.name)}">${escapeHtml(e.name)}</option>`).join("");
@@ -105,83 +105,82 @@ function fillStatic() {
 /* ---------- Header ---------- */
 
 function renderHeader() {
-  const count = (s) => COMMITMENTS.filter((c) => c.status === s).length;
-  const left = TODAY_PLAN.filter((p) => !state.done.has(p.id));
-  const leftCheckIns = left.filter((p) => p.commitment).length;
-  const word = NUMBER_WORDS[left.length] ?? left.length;
-  $("now").textContent = `${SETTINGS.today} · ${clock(SETTINGS.now)}`;
-  $("lead-sentence").textContent = left.length === 0
-    ? "Everything on today's plan is done."
-    : `${word} thing${left.length === 1 ? "" : "s"} left to finish by end of day` +
-      (leftCheckIns ? `, including ${(NUMBER_WORDS[leftCheckIns] ?? String(leftCheckIns)).toLowerCase()} check-in${leftCheckIns === 1 ? "" : "s"}.` : ".");
-  $("stats").innerHTML =
-    `<span class="badge overdue">${count("overdue")} overdue</span>` +
-    `<span class="badge at-risk">${count("at-risk")} at risk</span>` +
-    `<span class="badge on-track">${count("on-track")} on track</span>`;
+  $("now").textContent = `Good morning, ${SETTINGS.leadName} · ${SETTINGS.today} · ${clock(SETTINGS.now)}`;
 }
 
 /* ---------- Today: the end-of-day plan ---------- */
 
-function planItem(p) {
+/* One row: title and one time. Rows about an analyst's work get a "Step in"
+   tag and a "Why now" line; the lead's own tasks may carry a short note.
+   "quiet" rows (later today) show the title and time only. */
+function planItem(p, quiet = false) {
   const done = state.done.has(p.id);
   const c = p.commitment ? byId(p.commitment) : null;
   const late = !done && minutes(p.by) <= NOW;
   const title = c
     ? `<button class="plan-title" data-open="${c.id}">${escapeHtml(p.title)}</button>`
     : `<span class="plan-title">${escapeHtml(p.title)}</span>`;
-  const meta = c
-    ? `${dot(c.engagement)}${escapeHtml(c.title)} · ${escapeHtml(person(c.owner).fullName)} · <span class="${c.daysUntilDue <= 1 ? "urgent" : ""}">${dueLabel(c)}</span>`
-    : escapeHtml(p.note || "");
+  let second = "";
+  if (!done && !quiet) {
+    if (c) second = `<p class="plan-why"><span class="step-in">Step in</span>Why now: ${escapeHtml(c.reason)}</p>`;
+    else if (p.note) second = `<p class="plan-why meta">${escapeHtml(p.note)}</p>`;
+  }
+  const inlineTag = !done && quiet && c ? `<span class="step-in inline">Step in</span>` : "";
   return `
-    <li class="plan-item ${done ? "is-done" : ""} ${c && state.selectedId === c.id ? "selected" : ""}">
+    <li class="plan-item ${c && !done ? "is-step-in" : ""} ${done ? "is-done" : ""} ${c && state.selectedId === c.id ? "selected" : ""}">
       <input type="checkbox" class="plan-check" id="check-${p.id}" data-done="${p.id}" ${done ? "checked" : ""}
         aria-label="Mark done: ${escapeHtml(p.title)}">
-      <div class="plan-body">
-        <div class="row-title-line">${title}${c && !done ? badge(c.status) : ""}</div>
-        <div class="row-meta meta">${meta}</div>
-        ${c && !done ? `<p class="row-reason">${escapeHtml(c.reason)}</p>` : ""}
-      </div>
-      <span class="plan-time ${late ? "urgent" : ""}">${late ? "Was due " : "By "}${clock(p.by)}</span>
+      <div class="plan-body">${title}${inlineTag}${second}</div>
+      <span class="plan-time ${late ? "is-late" : ""}">${late ? "Past " : ""}${clock(p.by)}</span>
     </li>`;
 }
 
 function renderPlan() {
-  $("plan").innerHTML = DAY_PARTS.map((part) => {
-    const items = TODAY_PLAN.filter((p) => p.part === part.id).sort((a, b) => minutes(a.by) - minutes(b.by));
-    const status = pace(part);
-    const isNow = minutes(part.start) <= NOW && NOW < minutes(part.end);
+  const part = currentPart();
+  const byTime = (a, b) => minutes(a.by) - minutes(b.by);
+  const partIndex = DAY_PARTS.indexOf(part);
+  const earlierIds = DAY_PARTS.slice(0, partIndex).map((d) => d.id);
+
+  // Right now: this part of the day, plus anything left over from earlier parts.
+  // Unfinished first, in time order; done items at the bottom.
+  const nowItems = TODAY_PLAN.filter((p) => p.part === part.id || (earlierIds.includes(p.part) && !state.done.has(p.id)));
+  const open = nowItems.filter((p) => !state.done.has(p.id)).sort(byTime);
+  const finished = nowItems.filter((p) => state.done.has(p.id)).sort(byTime);
+
+  const laterParts = DAY_PARTS.slice(partIndex + 1);
+  const later = laterParts.map((d) => {
+    const items = TODAY_PLAN.filter((p) => p.part === d.id).sort(byTime);
+    if (!items.length) return "";
     return `
-      <section class="day-part ${isNow ? "is-now" : ""}" aria-labelledby="part-${part.id}">
-        <div class="day-part-head">
-          <h3 id="part-${part.id}">${part.name}<span class="meta"> · ${clock(part.start)}–${clock(part.end)}${isNow ? " · now" : ""}</span></h3>
-          <span class="${status.tone ? `badge ${status.tone}` : "meta"}">${status.word}</span>
-        </div>
-        <ul class="plan-list">${items.map(planItem).join("")}</ul>
-      </section>`;
+      <div class="later-part">
+        <h3 class="part-label">${d.name} <span class="meta">from ${clock(d.start)}</span></h3>
+        <ul class="plan-list quiet">${items.map((p) => planItem(p, true)).join("")}</ul>
+      </div>`;
   }).join("");
+
+  $("plan").innerHTML = `
+    <section class="now" aria-labelledby="now-heading">
+      <h1 id="now-heading">${PART_TITLE[part.id] || part.name}</h1>
+      <p class="now-pace meta">${paceLine(part, nowItems)}</p>
+      <ul class="plan-list card">
+        ${open.map((p) => planItem(p)).join("") || `<li class="plan-empty meta">Nothing left for ${part.name.toLowerCase()}.</li>`}
+        ${finished.map((p) => planItem(p)).join("")}
+      </ul>
+    </section>
+    ${later ? `<section class="quiet-section" aria-label="Later today"><h2 class="section-label">Later today</h2>${later}</section>` : ""}`;
 }
 
 /* ---------- Team ---------- */
 
 function renderTeam() {
   $("team-list").innerHTML = TEAM.map((p) => {
-    const mine = COMMITMENTS.filter((c) => c.owner === p.id)
-      .sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]);
-    const dueThisWeek = mine.filter((c) => c.daysUntilDue >= 0 && c.daysUntilDue <= 4).length;
+    const dueThisWeek = COMMITMENTS.filter((c) => c.owner === p.id && c.daysUntilDue >= 0 && c.daysUntilDue <= 4).length;
     return `
-      <div class="person">
-        <div class="person-head">
-          ${avatar(p.id)}
-          <div>
-            <div class="person-name">${escapeHtml(p.fullName)}</div>
-            <div class="meta">${mine.length} commitments · ${dueThisWeek} due this week</div>
-          </div>
-        </div>
-        <div class="status-bar" role="img" aria-label="${mine.map((c) => STATUS_LABEL[c.status]).join(", ")}">
-          ${mine.map((c) => `<span class="${c.status}" title="${escapeHtml(c.title)} · ${STATUS_LABEL[c.status]}"></span>`).join("")}
-        </div>
-        <p class="person-note">${escapeHtml(p.note)}</p>
-      </div>`;
+      <li class="person">
+        ${avatar(p.id, "small")}
+        <span class="person-name">${escapeHtml(p.fullName)}</span>
+        <span class="meta">${dueThisWeek} due this week · ${escapeHtml(p.note)}</span>
+      </li>`;
   }).join("");
 }
 
@@ -218,9 +217,9 @@ function renderTable() {
       </tr>`).join("");
 }
 
-function openTable(engagementName = "all") {
+function openTable() {
   state.tableOpen = true;
-  state.filters = { engagement: engagementName, owner: "all", status: "all" };
+  state.filters = { engagement: "all", owner: "all", status: "all" };
   renderTable();
   $("all-work").scrollIntoView({ behavior: "smooth" });
 }
@@ -246,14 +245,14 @@ function renderSheet() {
     <div class="facts">
       <div><div class="fact-label">Owner</div><div class="fact-value">${avatar(c.owner, "small")}${escapeHtml(person(c.owner).fullName)}</div></div>
       <div><div class="fact-label">Due</div><div class="fact-value">${escapeHtml(c.due)}</div><div class="meta">${dueLabel(c)}</div></div>
-      <div><div class="fact-label">Status</div>${badge(c.status)}</div>
+      <div><div class="fact-label">Status</div><div class="fact-value">${STATUS_LABEL[c.status]}</div></div>
       <div><div class="fact-label">Latest progress</div><div class="fact-value">${escapeHtml(c.progress)}</div></div>
     </div>
 
     ${c.reason ? `
     <div class="sheet-section">
-      <h3>${c.status === "overdue" ? "What needs attention" : "Why this could slip"}</h3>
-      <div class="callout ${c.status}">${escapeHtml(c.reason)}${c.since ? ` <span style="opacity:.8">At risk since ${escapeHtml(c.since)}.</span>` : ""}</div>
+      <h3>Why now</h3>
+      <div class="callout">${escapeHtml(c.reason)}${c.since ? ` <span class="meta">Flagged ${escapeHtml(c.since)}.</span>` : ""}</div>
     </div>` : ""}
 
     <div class="sheet-section">
@@ -267,7 +266,7 @@ function renderSheet() {
       <h3>${plan ? `On your plan for ${DAY_PARTS.find((d) => d.id === plan.part).name.toLowerCase()}, by ${clock(plan.by)}` : "Suggested next step"}</h3>
       <p class="next-step">${escapeHtml(plan ? plan.title : c.nextStep)}</p>
       ${plan ? `<button class="btn btn-primary" data-done-toggle="${plan.id}" ${checkedIn ? "disabled" : ""}>
-        ${checkedIn ? `${icon("check")}Check-in done` : "Mark check-in done"}
+        ${checkedIn ? `${icon("check")}Done` : "Mark done"}
       </button>
       ${checkedIn ? `<p class="confirmation">Done for today. The status stays “${STATUS_LABEL[c.status].toLowerCase()}” until the work moves.</p>` : ""}` : ""}
     </div>` : ""}`;
@@ -317,7 +316,7 @@ document.addEventListener("click", (event) => {
   setActiveNav(nav);
   if (nav === "today") window.scrollTo({ top: 0, behavior: "smooth" });
   else if (nav === "team") $("team-card").scrollIntoView({ behavior: "smooth", block: "center" });
-  else openTable(nav === "work" ? "all" : nav);
+  else openTable();
 });
 
 [["filter-engagement", "engagement"], ["filter-owner", "owner"], ["filter-status", "status"]].forEach(([id, key]) => {
