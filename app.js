@@ -61,13 +61,11 @@ const byId = (id) => COMMITMENTS.find((c) => c.id === id);
 const person = (id) => TEAM.find((p) => p.id === id) || { id, fullName: id, initials: id.slice(0, 2).toUpperCase(), role: "" };
 const engagement = (name) => ENGAGEMENTS.find((e) => e.name === name) || { name, program: "", dot: "northwind" };
 
-const dot = (name) => `<span class="dot ${engagement(name).dot === "harbor" ? "harbor" : ""}"></span>`;
+/* No engagement dots: an unexplained colored dot is noise (see DESIGN.md). */
+const dot = () => "";
 const badge = (status) => `<span class="badge ${status}">${STATUS_LABEL[status]}</span>`;
-/* Team members' avatars wear their own chart color (PERSON_COLOR in data.js). */
-const avatar = (ownerId, size = "") => {
-  const c = typeof PERSON_COLOR !== "undefined" && PERSON_COLOR[ownerId];
-  return `<span class="avatar ${size} ${c ? "person" : ""}" ${c ? `style="--pc:${c}"` : ""}>${escapeHtml(person(ownerId).initials)}</span>`;
-};
+/* Avatars stay neutral: person colors are kept for chart lines, where they identify a series. */
+const avatar = (ownerId, size = "") => `<span class="avatar ${size}">${escapeHtml(person(ownerId).initials)}</span>`;
 const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
 function dueLabel(c) {
@@ -124,7 +122,7 @@ function planItem(p, quiet = false) {
     : `<span class="plan-title">${escapeHtml(p.title)}</span>`;
   let second = "";
   if (!done && !quiet) {
-    if (c) second = `<p class="plan-why"><span class="step-in">${avatar(c.owner, "tiny")}Step in</span>Why now: ${escapeHtml(c.reason)}</p>`;
+    if (c) second = `<p class="plan-why"><span class="step-in">Step in · ${escapeHtml(c.owner)}</span>${escapeHtml(c.reason)}</p>`;
     else if (p.note) second = `<p class="plan-why meta">${escapeHtml(p.note)}</p>`;
   }
   const inlineTag = !done && quiet && c ? `<span class="step-in inline">Step in</span>` : "";
@@ -148,10 +146,8 @@ function renderToday() {
   // Unfinished first, in time order; done items at the bottom.
   const nowItems = TODAY_PLAN.filter((p) => p.part === part.id || (earlierIds.includes(p.part) && !state.done.has(p.id)));
 
-  $("greeting").textContent = `Good morning, ${SETTINGS.leadName} · ${SETTINGS.today} · ${clock(SETTINGS.now)}`;
-  $("now-heading").textContent = "Your day";
-  $("now-chip").className = `part-chip ${part.id}`;
-  $("now-chip").innerHTML = icon(PART_ICON[part.id] || "sun");
+  $("greeting").textContent = "";
+  $("now-heading").textContent = `Good morning, ${SETTINGS.leadName}`;
   const left = TODAY_PLAN.filter((p) => !state.done.has(p.id));
   const leftSteps = left.filter((p) => p.commitment).length;
 
@@ -165,9 +161,9 @@ function renderToday() {
     <div class="meta">${stepsDone} of ${steps.length} step-ins</div>`;
 
   renderStrip(part);
-  $("now-pace").textContent = left.length
+  $("now-pace").textContent = `${SETTINGS.today}, ${clock(SETTINGS.now)} · ` + (left.length
     ? `${plural(left.length, "thing")} left today, ${plural(leftSteps, "step-in")} · ${PART_TITLE[part.id] || part.name}: ${paceLine(part, nowItems).replace(/^Until [^·]+· /, "").toLowerCase()}`
-    : "Everything on today's plan is done.";
+    : "Everything on today's plan is done.");
   // Three colored lists, one per part of the day. In each: unfinished items
   // in time order, done ones at the bottom. The current part is highlighted.
   $("parts").innerHTML = DAY_PARTS.map((d, i) => {
@@ -181,9 +177,9 @@ function renderToday() {
     return `
       <section class="part-card ${d.id} ${isNow ? "is-now" : ""}" aria-labelledby="part-${d.id}">
         <header class="part-head">
-          <span class="part-chip ${d.id}">${icon(PART_ICON[d.id] || "sun")}</span>
+          ${icon(PART_ICON[d.id] || "sun")}
           <div>
-            <h2 id="part-${d.id}">${d.name}${isNow ? ` <span class="now-pill">Now</span>` : ""}</h2>
+            <h2 id="part-${d.id}">${d.name}${isNow ? ` <span class="now-label">Now</span>` : ""}</h2>
             <div class="meta">${clock(d.start)}–${clock(d.end)} · ${status}</div>
           </div>
           <span class="part-count">${finished.length}/${items.length}</span>
@@ -237,7 +233,11 @@ function renderStrip(nowPart) {
       <div class="strip-now" style="left:${pos(NOW)}%"><span>Now · ${clock(SETTINGS.now)}</span></div>
       ${dots}
     </div>
-    <div class="strip-ticks">${ticks.join("")}</div>`;
+    <div class="strip-ticks">${ticks.join("")}</div>
+    <div class="strip-key" aria-hidden="true">
+      <span><i class="k-step"></i>Step in</span><span><i class="k-own"></i>Your task</span>
+      <span><i class="k-done"></i>Done</span><span><i class="k-now"></i>Now</span>
+    </div>`;
 
   strip.querySelectorAll(".strip-dot").forEach((b) => {
     const p = TODAY_PLAN.find((t) => t.id === b.dataset.dot);
@@ -352,17 +352,17 @@ function renderProgress() {
     </div>
     <div class="kpi">
       <div class="kpi-label">You · Step-ins last week</div>
-      <div class="kpi-row-inner"><div class="kpi-value">${L.done[last]} <span class="kpi-of">of ${L.planned[last]}</span></div>${Viz.spark(leadRate)}</div>
+      <div class="kpi-row-inner"><div class="kpi-value">${L.done[last]} <span class="kpi-of">of ${L.planned[last]}</span></div>${Viz.spark(leadRate, { color: "#3B5BDB" })}</div>
       ${delta(leadRate[last], leadRate[last - 1])}
     </div>
     <div class="kpi">
       <div class="kpi-label">Team · On time last week</div>
-      <div class="kpi-row-inner"><div class="kpi-value">${teamRate[last]}%</div>${Viz.spark(teamRate)}</div>
+      <div class="kpi-row-inner"><div class="kpi-value">${teamRate[last]}%</div>${Viz.spark(teamRate, { color: "#3B5BDB" })}</div>
       <div class="meta">${teamOnLast} of ${teamDueLast} commitments · ${delta(teamRate[last], teamRate[last - 1])}</div>
     </div>
     <div class="kpi">
       <div class="kpi-label">Team · Flagged work caught early</div>
-      <div class="kpi-row-inner"><div class="kpi-value">${caught} <span class="kpi-of">of ${caught + slipped}</span></div>${Viz.spark(caughtRate)}</div>
+      <div class="kpi-row-inner"><div class="kpi-value">${caught} <span class="kpi-of">of ${caught + slipped}</span></div>${Viz.spark(caughtRate, { color: "#3B5BDB" })}</div>
       <div class="meta">Over six weeks · ${slipped} slipped anyway</div>
     </div>`;
 
@@ -372,14 +372,14 @@ function renderProgress() {
   });
   Viz.columns($("chart-stepins"), {
     labels: W, label: "Step-ins done out of planned, last six weeks",
-    fill: { name: "Done", color: "#2a78d6", values: L.done },
-    track: { name: "Planned", color: "#cde2fb", values: L.planned },
+    fill: { name: "Done", color: "#3B5BDB", values: L.done },
+    track: { name: "Planned", color: "#D6DDF8", values: L.planned },
   });
   Viz.columns($("chart-flagged"), {
     labels: W, label: "Flagged work caught early or slipped, last six weeks",
     stacked: [
-      { name: "Caught early", color: "#2a78d6", values: F.caughtEarly },
-      { name: "Slipped", color: "#B8BDC5", values: F.slipped },
+      { name: "Caught early", color: "#3B5BDB", values: F.caughtEarly },
+      { name: "Slipped", color: "#C9C4B9", values: F.slipped },
     ],
   });
 }

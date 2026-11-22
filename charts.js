@@ -8,7 +8,7 @@
 
 const Viz = (() => {
   const NS = "http://www.w3.org/2000/svg";
-  const INK = { primary: "#1F2328", secondary: "#5B6470", muted: "#898781", grid: "#ECEDEF", axis: "#C9CDD3", surface: "#FFFFFF" };
+  const INK = { primary: "#1D1C1A", secondary: "#5F5B53", muted: "#8A857B", grid: "#EEEBE5", axis: "#D3CEC4", surface: "#FFFFFF" };
 
   /* ---------- tiny DOM helpers (text always via textContent) ---------- */
 
@@ -229,7 +229,7 @@ const Viz = (() => {
     const sy = (v) => height - 3 - (v / yMax) * (height - 6);
     const d = values.map((v, i) => `${i ? "L" : "M"}${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join("");
     return `<svg class="spark" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" aria-hidden="true">
-      <path d="${d}" fill="none" stroke="#B8BDC5" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="${d}" fill="none" stroke="#C9C4B9" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
       <circle cx="${sx(n - 1)}" cy="${sy(values[n - 1])}" r="4" fill="${color}" stroke="#fff" stroke-width="2"/></svg>`;
   }
 

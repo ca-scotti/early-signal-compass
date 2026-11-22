@@ -3,46 +3,48 @@ version: alpha
 name: Ahead
 description: A calm start-of-day view that tells a team lead the few things worth acting on.
 colors:
-  primary: "#1F2328"
-  secondary: "#5B6470"
+  primary: "#1D1C1A"
+  secondary: "#5F5B53"
   tertiary: "#3B5BDB"
-  neutral: "#F6F7F9"
+  neutral: "#F6F5F1"
   surface: "#FFFFFF"
-  border: "#E3E6EA"
+  border: "#E6E3DC"
   on-tertiary: "#FFFFFF"
-  tertiary-soft: "#EEF2FF"
+  tertiary-soft: "#ECEFFC"
   warning: "#92400E"
   warning-soft: "#FEF3C7"
   danger: "#B42318"
   danger-soft: "#FEE4E2"
   success: "#067647"
   success-soft: "#DCFAE6"
-  engagement-northwind: "#7C5CFC"
-  engagement-harbor: "#0E9384"
+  muted: "#8A857B"
+  morning: "#FBF7EE"
+  afternoon: "#F5ECDB"
+  evening: "#ECE3D3"
 typography:
   display:
-    fontFamily: Inter
+    fontFamily: Source Serif 4
     fontSize: 28px
     fontWeight: 600
     lineHeight: 1.25
     letterSpacing: -0.02em
   title:
-    fontFamily: Inter
+    fontFamily: Source Serif 4
     fontSize: 16px
     fontWeight: 600
     lineHeight: 1.4
   body:
-    fontFamily: Inter
+    fontFamily: IBM Plex Sans
     fontSize: 14px
     fontWeight: 400
     lineHeight: 1.55
   small:
-    fontFamily: Inter
+    fontFamily: IBM Plex Sans
     fontSize: 13px
     fontWeight: 400
     lineHeight: 1.5
   label:
-    fontFamily: Inter
+    fontFamily: IBM Plex Sans
     fontSize: 12px
     fontWeight: 500
     lineHeight: 1.4
@@ -105,12 +107,6 @@ components:
     typography: "{typography.small}"
   divider:
     backgroundColor: "{colors.border}"
-  engagement-dot-northwind:
-    backgroundColor: "{colors.engagement-northwind}"
-    size: 8px
-  engagement-dot-harbor:
-    backgroundColor: "{colors.engagement-harbor}"
-    size: 8px
 ---
 
 ## Overview
@@ -138,10 +134,9 @@ Guiding principles:
 - **Show the reason, hide the record.** A row shows what to do, when, and why
   now. A commitment's due date, owner, source and progress live in the side
   panel and on the team member's page.
-- **Colorful, but every color means something.** Indigo means "act here".
-  Each part of the day has its own soft tint (morning sky, afternoon peach,
-  evening lavender) and each team member has their own color. Status colors
-  appear only in the All commitments table.
+- **Warm, but with a strict color budget.** Ink, one indigo accent ("act
+  here"), and warm paper neutrals. The parts of the day are shades of one sand
+  color. Status colors appear only in the All commitments table.
 - **Progress is shown as trends, kindly.** Charts show how the lead and each
   analyst are doing over the last six weeks (on time, step-ins, flagged work
   caught early). They describe the work, not grade the person: no scores,
@@ -149,59 +144,54 @@ Guiding principles:
 
 ## Colors
 
-The palette is light, neutral and quiet, with one action color.
+A strict color budget: **one dominant (ink), one accent (indigo), one neutral
+family (warm paper)**. Every other color on screen is a shade of these, or
+identifies a line in a chart. See "Not vibe-coded" under Do's and Don'ts.
 
-- **Primary (#1F2328):** ink for headings and body text, and for a late time
-  ("Past 9:30 am" in bold ink, not red).
-- **Secondary (#5B6470):** slate for metadata, notes and "Why now" text.
-- **Tertiary (#3B5BDB):** indigo, the only color for action: buttons, links,
-  the active nav item, the "Step in" tag and the edge of a step-in row.
-- **Neutral (#F6F7F9):** the page and sidebar background, so the one white
-  card lifts off it without shadows.
-- **Status colors:** warning, danger and success appear only as badges in the
-  full commitments table, always with a word.
-- **Engagement dots:** an 8px dot that tells engagements apart, used only in
-  the side panel.
-
-### Day and people colors
-
-- **Parts of the day:** morning `#E7F5FF` with `#1C7ED6` icons (sunrise),
-  afternoon `#FFF4E6` with `#E8590C` icons (sun), evening `#F3F0FF` with
-  `#7048E8` icons (moon). Used for the day timeline, the part chip next to
-  "This morning" and the "Later today" labels. They tell the parts apart;
+- **Ink (#1D1C1A):** headings and body text, the "now" line, a late time
+  ("Past 9:30 am" in bold ink, never red).
+- **Warm slate (#5F5B53) and muted (#8A857B):** metadata, notes, axis labels.
+- **Indigo (#3B5BDB), the only accent:** it means "step in / act here".
+  Step-in tags and timeline dots, the "Now" label, buttons, links, the active
+  nav item, the progress meter, and step-ins in the Progress charts.
+- **Warm paper (#F6F5F1) and white:** the page is paper; the few panels are
+  white with a 1px hairline (#E6E3DC).
+- **Parts of the day:** three shades of one warm sand, light to deep, like
+  daylight moving: morning #FBF7EE, afternoon #F5ECDB, evening #ECE3D3. Used
+  for the timeline segments and the list headers. They tell the parts apart;
   they never mean good or bad.
-- **People:** each team member's avatar is a soft tint of their chart color
-  (Priya blue, Marcus orange) with darker initials, everywhere they appear:
-  step-in tags, team tiles (with a 3px top edge in their color), the table and
-  the side panel. The lead's own avatar stays grey.
+- **Status colors** (warning, danger, success) appear only as labeled badges in
+  the All commitments table, and as "▲ / ▼ … vs week before" change words.
+- **No decorative color:** no engagement dots, no colored side or top edges,
+  no colored avatars.
 
 ### Chart colors
 
 Charts follow the data-viz palette, checked with its colorblind-safety
-validator (all pairs pass on the white card surface):
+validator (all pairs pass on the white surface):
 
-- **One color per person, fixed:** Priya blue `#2a78d6`, Marcus orange
-  `#eb6834`. A third person takes the next slot (aqua `#1baf7a`). Colors follow
-  the person on every chart, never their rank.
-- **One series = blue `#2a78d6`.** A "planned" track behind it is a lighter
-  step of the same blue (`#cde2fb`); "slipped" is a neutral grey (`#B8BDC5`).
-- **Change words:** "▲ 2 pts vs week before" in success green, "▼" in danger red,
-  always with the arrow and words.
-- Chart text is always ink (primary, secondary or muted), never the series color.
+- **People:** Priya blue `#2a78d6`, Marcus orange `#eb6834` (next: aqua
+  `#1baf7a`), only on the "On time" lines and sparklines, where a color must
+  identify a person. Colors follow the person, never their rank.
+- **Step-ins and flagged work:** the accent indigo `#3B5BDB`, with a light
+  indigo track (`#D6DDF8`) for "planned" and warm grey (`#C9C4B9`) for
+  "slipped".
+- Chart text is always ink, slate or muted, never the series color. Grid and
+  axes are warm hairlines.
 
 ## Typography
 
-Inter throughout, in five styles. Nothing on screen is smaller than 12px.
+Two typefaces, chosen on purpose rather than the AI-tool default:
 
-- **Display (28px/600):** the current part of the day ("This morning"), and
-  nothing else.
-- **Title (16px/600):** section headings ("Later today", "Your team this week").
-  Plan titles are 15px/600 for now and 14px/500 for later.
-- **Body (14px/400):** "Why now" lines, times and notes.
-- **Small (13px/400):** metadata and the greeting line.
-- **Label (12px/500):** the "Step in" tag, buttons and table headers.
+- **Source Serif 4** (500/600) for headings: the greeting, page titles, part
+  names, card titles, people's names. An editorial voice suits a strategy
+  consultant's briefing.
+- **IBM Plex Sans** (400/500/600) for everything else: rows, metadata,
+  buttons, and **all numbers** (figures stay in the sans).
 
-Avoid uppercase labels and monospace text. Both make the page feel busier.
+Sizes: display 28px, titles 16–18px, body 14px, small 13px, labels 12px.
+Nothing is smaller than 11px (timeline hours) and nothing else under 12px.
+No all-caps labels, no monospace.
 
 ## Layout
 
@@ -227,9 +217,15 @@ Avoid uppercase labels and monospace text. Both make the page feel busier.
 
 ## Elevation & Depth
 
-Flat. Cards are separated from the grey page by a 1px border. Clickable cards
-(team member cards and tiles) get an indigo border on hover. Only the side
-panel gets a shadow, because it floats over content.
+Flat. Grouping comes from whitespace, hairlines and type, not boxes:
+
+- Top priorities has **one** white panel (the three lists, split by vertical
+  hairlines). The timeline and the team line sit directly on the page.
+- Progress has one panel for the headline figures and one for the charts.
+- Cards are kept only for things you can act on as a whole: a team member's
+  card (opens their page) and the side panel.
+- No glows, no colored rings. Only the side panel and tooltips cast a shadow,
+  because they float over content.
 
 ## Shapes
 
@@ -239,26 +235,27 @@ row in the card has a 3px indigo edge on the left.
 
 ## Components
 
-- **Day timeline:** 8 am to 8 pm in three tinted parts with their icon and
-  name, a dark "now" line, and each to-do as a 16px dot at its time: indigo
-  for a step-in, white with a grey ring for the lead's own task, grey with a
-  check when done. Hover or focus shows the item; clicking a step-in opens it.
+- **Day timeline:** sits on the page (no box). 8 am to 8 pm in three sand
+  shades with a small icon and name, an ink "now" line, and each to-do as a
+  14px dot at its time: indigo for a step-in, white with a grey ring for the
+  lead's own task, grey with a check when done. A key under it explains every
+  dot. Hover or focus shows the item; clicking a step-in opens it.
 - **Done today:** the count (28px), "of N done today", a blue meter on a light
   blue track, and "N of N step-ins".
-- **Part-of-day list:** a card with a 4px top edge in the part's ink color,
-  a tinted header (icon chip, name, "Now" tag if current, time range and
-  status such as "1 past its time" or "Starts at 12 pm", and a done count like
-  "1/3"), then its plan rows. In parts that aren't current, titles are 500
-  weight and "Why now" is cut to one line.
+- **Part-of-day lists:** one white panel split into three columns by
+  hairlines. Each column has a sand-tinted header (icon, serif name, an indigo
+  "Now" label if current, time range and status, done count like "1/3"), then
+  its plan rows. In parts that aren't current, titles are 500 weight and the
+  reason is cut to one line. No colored edges.
 - **Plan row:** a checkbox, the title, and one time on the right ("1 pm"). A
   late time reads "Past 9:30 am" in bold ink. At most one more line: for a
   step-in row, the "Step in" tag and "Why now: …"; for the lead's own task, a
   short note. Done rows are struck through and lose the second line. A step-in
   title opens the side panel.
 
-- **Team chip (Top priorities):** a slim card with a 4px left edge in the
-  person's color: avatar, name, "N step-ins today, next 1 pm", their on-time
-  sparkline and value, and an arrow to their page.
+- **Team line (Top priorities):** no boxes: for each person, a neutral
+  avatar, serif name, "N step-ins today, next 1 pm", their on-time sparkline
+  and value, and an arrow to their page.
 - **Team member card (Team):** large avatar, name, role and engagements; three
   numbers in words (commitments, due this week, need you); a one-line note;
   "Step in today" and "Needs you this week" lists; "Open details".
@@ -283,6 +280,25 @@ row in the card has a 3px indigo edge on the left.
 - **Buttons:** one primary button per view at most (in the side panel).
 
 ## Do's and Don'ts
+
+### Not vibe-coded
+
+From "7 Signs a UI Has Been Vibe Coded" (The Fountain Institute), and how
+this app answers each:
+
+1. **Competing colors** → one dominant, one accent, one neutral family.
+2. **Decorative glow** → none; emphasis comes from type and the "Now" label.
+3. **Emojis as icons** → one consistent line-icon set (Lucide), 16px.
+4. **Trendy gradients** → none; flat fills only.
+5. **Cards for everything** → one panel per page section; hairlines and
+   whitespace do the grouping.
+6. **Multicolored side tabs** → none.
+7. **Dots that mean nothing** → every dot is data with a key (the timeline),
+   or it is removed (engagement dots).
+8. **The default AI font** → Source Serif 4 + IBM Plex Sans.
+
+### General
+
 
 - **Do** lead with what's left right now, in time order.
 - **Do** give each topic its own page, and fit each page in the window.
