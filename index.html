@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ahead — Today</title>
+  <title>Ahead — Top priorities</title>
   <meta name="description" content="A team lead's day in order, with the moments to step in on an analyst's work.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
   <div class="app">
@@ -24,9 +24,12 @@
       </div>
       <div class="firm-name meta" data-text="firmName"></div>
 
-      <button class="nav-item active" data-nav="today"><span data-icon="sun"></span>Today</button>
-      <button class="nav-item" data-nav="team"><span data-icon="users"></span>Team</button>
-      <button class="nav-item" data-nav="work"><span data-icon="list"></span>All commitments</button>
+      <nav class="nav">
+        <a class="nav-item" href="#/today" data-page="today"><span data-icon="sun"></span>Top priorities</a>
+        <a class="nav-item" href="#/team" data-page="team"><span data-icon="users"></span>Team</a>
+        <div class="nav-people" id="nav-people"></div>
+        <a class="nav-item" href="#/commitments" data-page="commitments"><span data-icon="list"></span>All commitments</a>
+      </nav>
 
       <div class="user-profile">
         <span class="avatar" data-text="leadInitials"></span>
@@ -37,41 +40,96 @@
       </div>
     </aside>
 
-    <!-- ============ Main ============ -->
+    <!-- ============ Pages (one shows at a time) ============ -->
     <main class="main">
-      <div class="content">
 
-        <p class="meta greeting" id="now"></p>
-
-        <!-- Right now: the current part of the day. The hero of the page -->
-        <div id="plan"></div>
-
-        <!-- The team, in a few words -->
-        <section class="quiet-section" id="team-card" aria-labelledby="team-heading">
-          <h2 class="section-label" id="team-heading">Your team this week</h2>
-          <ul class="team-list" id="team-list"></ul>
-        </section>
-
-        <!-- Full list, collapsed by default -->
-        <section class="all-work" id="all-work" aria-labelledby="all-work-heading">
-          <h2 class="sr-only" id="all-work-heading">All commitments</h2>
-          <button class="btn-text all-work-toggle" id="all-work-toggle" aria-expanded="false" aria-controls="all-work-panel"></button>
-          <div class="card" id="all-work-panel" hidden>
-            <div class="filter-bar">
-              <select class="filter-select" id="filter-engagement" aria-label="Filter by engagement"></select>
-              <select class="filter-select" id="filter-owner" aria-label="Filter by person"></select>
-              <select class="filter-select" id="filter-status" aria-label="Filter by status">
-                <option value="all">Any status</option>
-                <option value="at-risk">At risk</option>
-                <option value="overdue">Overdue</option>
-                <option value="on-track">On track</option>
-              </select>
-              <button class="btn-text" id="filter-reset" hidden>Clear filters</button>
+      <!-- Top priorities: what's left right now, and later today -->
+      <section class="page" id="page-today" aria-labelledby="now-heading">
+        <header class="page-head">
+          <p class="meta" id="greeting"></p>
+          <h1 id="now-heading"></h1>
+          <p class="page-sub" id="now-pace"></p>
+        </header>
+        <div class="page-grid today-grid">
+          <div class="stack">
+            <div class="card">
+              <h2 class="card-title">Right now</h2>
+              <ul class="plan-list" id="now-list"></ul>
             </div>
+            <div class="card fill">
+              <h2 class="card-title">Your team today</h2>
+              <div class="team-tiles" id="team-tiles"></div>
+            </div>
+          </div>
+          <div class="card fill">
+            <h2 class="card-title">Later today</h2>
+            <div class="scroll" id="later-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Team: one card per person -->
+      <section class="page" id="page-team" aria-labelledby="team-heading" hidden>
+        <header class="page-head">
+          <h1 id="team-heading">Your team</h1>
+          <p class="page-sub" id="team-sub"></p>
+        </header>
+        <div class="page-grid team-grid" id="team-grid"></div>
+      </section>
+
+      <!-- One team member -->
+      <section class="page" id="page-person" aria-labelledby="person-heading" hidden>
+        <a class="back-link" href="#/team">← Team</a>
+        <header class="page-head person-head-lg">
+          <span class="avatar large" id="person-avatar"></span>
+          <div>
+            <h1 id="person-heading"></h1>
+            <p class="page-sub" id="person-sub"></p>
+          </div>
+        </header>
+        <div class="page-grid person-grid">
+          <div class="stack">
+            <div class="card">
+              <h2 class="card-title">Step in today</h2>
+              <ul class="plan-list" id="person-stepins"></ul>
+            </div>
+            <div class="card fill">
+              <h2 class="card-title">By engagement</h2>
+              <div class="eng-grid" id="person-engagements"></div>
+            </div>
+          </div>
+          <div class="card fill">
+            <h2 class="card-title">Commitments</h2>
+            <ul class="commit-list scroll" id="person-commitments"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- All commitments -->
+      <section class="page" id="page-commitments" aria-labelledby="work-heading" hidden>
+        <header class="page-head">
+          <h1 id="work-heading">All commitments</h1>
+          <p class="page-sub" data-text="footer"></p>
+        </header>
+        <div class="card fill">
+          <div class="filter-bar">
+            <select class="filter-select" id="filter-engagement" aria-label="Filter by engagement"></select>
+            <select class="filter-select" id="filter-owner" aria-label="Filter by person"></select>
+            <select class="filter-select" id="filter-status" aria-label="Filter by status">
+              <option value="all">Any status</option>
+              <option value="at-risk">At risk</option>
+              <option value="overdue">Overdue</option>
+              <option value="on-track">On track</option>
+            </select>
+            <button class="btn-text" id="filter-reset" hidden>Clear filters</button>
+            <span class="meta filter-count" id="table-count"></span>
+          </div>
+          <div class="scroll">
             <table class="work-table">
               <thead>
                 <tr>
                   <th>Commitment</th>
+                  <th class="col-eng">Engagement</th>
                   <th class="col-owner">Owner</th>
                   <th class="col-due">Due</th>
                   <th>Status</th>
@@ -80,18 +138,17 @@
               <tbody id="work-table-body"></tbody>
             </table>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <footer class="page-footer" data-text="footer"></footer>
-      </div>
     </main>
   </div>
 
-  <!-- Side panel (filled in by app.js when you click an item you step in on) -->
+  <!-- Side panel (filled in by app.js when you open a commitment) -->
   <div class="sheet-overlay" id="sheet-overlay" hidden></div>
   <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden></div>
 
-  <script src="data.js?v=5"></script>
-  <script src="app.js?v=5"></script>
+  <script src="data.js?v=6"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>

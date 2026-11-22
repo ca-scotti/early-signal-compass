@@ -122,20 +122,24 @@ now, and when should I step in?* Everything else is below it or one click away.
 
 Guiding principles:
 
-- **Right now first.** The largest thing on the screen is the current part of
-  the day ("This morning"), with its unfinished items in time order and done
-  items at the bottom. Leftovers from an earlier part of the day join it.
-- **A sequence, not a grid.** In interviews, a grid of warnings felt "too
-  much". One centred column reads top to bottom, like the day.
+- **Pages, not a long scroll.** The app has four pages: Top priorities, Team,
+  one page per team member, and All commitments. Each page fills the window
+  and fits without scrolling on a laptop (1366×768 and up).
+- **Right now first.** On Top priorities, the largest thing on the screen is
+  the current part of the day ("This morning"), with its unfinished items in
+  time order and done items at the bottom. Leftovers from an earlier part of
+  the day join it.
+- **A sequence, not a status board.** In interviews, a grid of warnings felt
+  "too much". The day reads top to bottom, like the day.
 - **Stepping in is an action, never a status flag.** Work that may slip shows
   up as a row the lead acts on ("15-min check-in with Priya"), marked with an
   indigo "Step in" tag and a "Why now" line. No "At risk" or "Overdue" badges,
-  and no red, on the day plan.
+  and no red, on Top priorities.
 - **Show the reason, hide the record.** A row shows what to do, when, and why
-  now. The commitment's due date, owner, source and progress live in the side
-  panel.
+  now. A commitment's due date, owner, source and progress live in the side
+  panel and on the team member's page.
 - **Calm by default.** Ink on white and grey. Indigo means "act here". Status
-  colors appear only in the full commitments table, behind a click.
+  colors appear only in the All commitments table.
 
 ## Colors
 
@@ -169,19 +173,25 @@ Avoid uppercase labels and monospace text. Both make the page feel busier.
 
 ## Layout
 
-- A 224px sidebar with the same grey as the page (no border), and one content
-  column of up to 720px.
-- Top to bottom: a quiet greeting line, "This morning" with one pace line,
-  the one white card, "Later today", "Your team this week", then the collapsed
-  "See all 12 commitments".
-- An 8px spacing rhythm: 14px inside plan rows, 40px between sections.
-- On phones the sidebar becomes a row of links and the time stays on the right
-  of each row.
+- A 232px sidebar, the same grey as the page: Top priorities, Team (with one
+  link per team member under it), All commitments, and the lead's profile.
+- The app fills the window. Each page is a header (28px title and one line)
+  and cards that stretch to the bottom of the window.
+- **Top priorities:** two columns (3:2). Left: "Right now" and "Your team
+  today" (one tile per person, linking to their page). Right: "Later today".
+- **Team:** one card per person, side by side, each linking to their page.
+- **Team member:** two columns (3:2). Left: "Step in today" and "By
+  engagement". Right: all of their commitments.
+- **All commitments:** filters and a one-line-per-row table.
+- If content is longer than the window, it scrolls inside its card, never the
+  page. Below 960px wide or 600px tall, cards stack and the page scrolls.
+- An 8px spacing rhythm: 24px between cards and inside them.
 
 ## Elevation & Depth
 
-Flat. The only card is the "right now" list, separated by a 1px border. Only
-the side panel gets a shadow, because it floats over content.
+Flat. Cards are separated from the grey page by a 1px border. Clickable cards
+(team member cards and tiles) get an indigo border on hover. Only the side
+panel gets a shadow, because it floats over content.
 
 ## Shapes
 
@@ -199,17 +209,25 @@ row in the card has a 3px indigo edge on the left.
   short note. Done rows are struck through and lose the second line. A step-in
   title opens the side panel.
 - **Later row:** the same row, quieter (14px/500): title, time, and the
-  "Step in" tag inline after the title. No second line.
-- **Team line:** small avatar, name, "N due this week · one-line note". No
-  coloured bars.
-- **Side panel:** engagement, title, a fact grid (owner, due, status in words,
-  progress), a neutral "Why now" box, the original quote with its source, and
-  where it sits on today's plan, with the one primary button "Mark done".
+  "Step in" tag inline after the title.
+- **Team tile (Top priorities):** avatar, name, "N step-ins today · N due this
+  week", the next step-in with its time, and "Open details".
+- **Team member card (Team):** large avatar, name, role and engagements; three
+  numbers in words (commitments, due this week, need you); a one-line note;
+  "Step in today" and "Needs you this week" lists; "Open details".
+- **Team member page:** back link, name, one summary line; "Step in today"
+  rows (same as plan rows); one small box per engagement with counts; and the
+  full commitments list with status in words and due date.
+- **Side panel:** engagement, title, a fact grid (owner links to their page,
+  due, status in words, progress), a neutral "Why now" box, the original quote
+  with its source, and where it sits on today's plan, with the one primary
+  button "Mark done".
 - **Buttons:** one primary button per view at most (in the side panel).
 
 ## Do's and Don'ts
 
 - **Do** lead with what's left right now, in time order.
+- **Do** give each topic its own page, and fit each page in the window.
 - **Do** keep each row to a title, one time and at most one more line.
 - **Don't** show status badges, red or traffic-light colors on the day plan.
 - **Don't** show the same number twice on one screen, or two dates on one row.

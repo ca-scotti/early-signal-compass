@@ -1,6 +1,6 @@
 # Ahead — Early Signal Compass
 
-Interview prototype: a team lead's day plan. The first screen shows what's left right now ("This morning"), in time order, with moments to step in on an analyst's work marked "Step in". Later today and the team follow below. This is Phase 1 of the roadmap.
+Interview prototype: a team lead's day plan, in four pages. **Top priorities** shows what's left right now ("This morning"), with moments to step in on an analyst's work marked "Step in", plus later today. **Team** has a card per person, and each person has their own details page. **All commitments** lists everything with filters. This is Phase 1 of the roadmap.
 
 **Live site:** https://ca-scotti.github.io/early-signal-compass/
 
@@ -24,11 +24,11 @@ If something breaks, open the file's **History** and revert your last commit.
 | `DESIGN.md` | The design rules: colors, type, spacing and what goes on screen (follows the [design.md](https://github.com/google-labs-code/design.md) format) | Read before changing the look. Update it when you change a color or rule |
 | `styles.css` | Colors, sizes and spacing, following `DESIGN.md`. Colors are at the top in `:root` | Changing how the page looks |
 | `index.html` | The page skeleton: headings and section labels | Renaming a section or moving one around |
-| `app.js` | How the page behaves: clicks, the side panel, filters, counts | Changing interactions |
+| `app.js` | How the pages behave: the four pages (addresses like `#/team/Priya`), clicks, the side panel, filters, counts | Changing interactions |
 
 Words and counts on the page, such as "This morning", "1 past its time" and "3 due this week", are calculated from `data.js`. You don't need to update them by hand.
 
-**If a change doesn't show up:** browsers keep files for up to 10 minutes. To push a change to everyone right away, open `index.html` and raise the number in `?v=5` (on the `styles.css`, `data.js` and `app.js` lines) to `?v=6`, and so on.
+**If a change doesn't show up:** browsers keep files for up to 10 minutes. To push a change to everyone right away, open `index.html` and raise the number in `?v=6` (on the `styles.css`, `data.js` and `app.js` lines) to `?v=7`, and so on.
 
 ## Previewing a change before it goes live (optional)
 
