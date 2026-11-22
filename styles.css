@@ -358,7 +358,7 @@ button.plan-title:hover { color: var(--tertiary); }
 .commit-row:first-child { border-top: 0; }
 .commit-row.selected { background: var(--tertiary-soft); border-radius: var(--rounded-md); }
 .commit-row .plan-title { font-size: 14px; }
-.commit-row .meta { display: flex; align-items: center; gap: 6px; }
+.commit-row .meta .dot { margin-right: 4px; vertical-align: 1px; }
 .commit-side { display: flex; flex-direction: column; align-items: flex-end; text-align: right; white-space: nowrap; }
 .status-strong { font-size: 13px; font-weight: 600; }
 
@@ -366,6 +366,71 @@ button.plan-title:hover { color: var(--tertiary); }
 .eng-block { padding: var(--space-md); border: 1px solid var(--border); border-radius: var(--rounded-md); }
 .eng-name { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; }
 .eng-line { margin: var(--space-sm) 0 var(--space-xs); font-size: 14px; }
+
+/* ---------- Charts (see charts.js) ---------- */
+
+.card-head-row { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px var(--space-md); }
+.viz { flex: 1; min-height: 0; display: flex; flex-direction: column; margin-top: var(--space-sm); }
+.viz-plot { flex: 1 1 0; min-height: 140px; overflow: hidden; }
+.viz-plot svg { display: block; outline: none; }
+.viz-plot svg:focus-visible { outline: 2px solid var(--tertiary); outline-offset: 2px; border-radius: var(--rounded-sm); }
+.viz-legend { display: flex; flex-wrap: wrap; gap: 4px var(--space-md); margin-top: var(--space-xs); color: var(--secondary); font-size: 12px; }
+.viz-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.viz-key { display: inline-block; flex-shrink: 0; }
+.viz-key.line { width: 14px; height: 2px; border-radius: 1px; }
+.viz-key.rect { width: 10px; height: 10px; border-radius: 2px; }
+.viz-table { margin-top: var(--space-xs); font-size: 12px; color: var(--secondary); }
+.viz-table summary { cursor: pointer; width: fit-content; }
+.viz-table summary:hover { color: var(--tertiary); }
+.viz-table table { margin-top: var(--space-xs); font-size: 12px; font-variant-numeric: tabular-nums; }
+.viz-table th, .viz-table td { padding: 3px 8px 3px 0; text-align: left; border-bottom: 1px solid var(--border); }
+.viz-table th { font-weight: 500; }
+
+.viz-tip {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+  min-width: 140px;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-sm);
+  box-shadow: 0 6px 20px rgb(31 35 40 / 0.12);
+  font-size: 12px;
+}
+.viz-tip-title { color: var(--secondary); margin-bottom: 4px; }
+.viz-tip-row { display: flex; align-items: center; gap: 8px; line-height: 1.7; }
+.viz-tip-row strong { font-size: 13px; color: var(--primary); font-variant-numeric: tabular-nums; }
+.viz-tip-name { color: var(--secondary); }
+
+.spark { flex-shrink: 0; }
+.delta { font-size: 12px; font-weight: 500; color: var(--secondary); }
+.delta.good { color: var(--success); }
+.delta.bad { color: var(--danger); }
+
+/* Progress page */
+.kpi-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-lg); }
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rounded-lg);
+}
+.kpi-label { color: var(--secondary); font-size: 12px; font-weight: 500; }
+.kpi-value { white-space: nowrap; font-size: 28px; font-weight: 600; line-height: 1.15; letter-spacing: -0.01em; }
+.kpi-of { font-size: 14px; font-weight: 400; color: var(--secondary); letter-spacing: 0; }
+.kpi-row-inner { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-sm); }
+.meter { height: 8px; border-radius: var(--rounded-full); background: #CDE2FB; overflow: hidden; }
+.meter span { display: block; height: 100%; border-radius: var(--rounded-full); background: #2A78D6; }
+.progress-grid { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); }
+
+/* Team card trend */
+.member-trend { display: flex; align-items: center; gap: var(--space-md); }
+.trend-value { font-size: 20px; font-weight: 600; line-height: 1.2; }
+.trend-note { margin-left: auto; text-align: right; }
 
 /* ---------- All commitments page ---------- */
 
@@ -471,7 +536,9 @@ a.owner:hover { color: var(--tertiary); }
 /* ---------- Smaller screens: stack and let the page scroll ---------- */
 
 @media (max-width: 960px) {
-  .today-grid, .person-grid { grid-template-columns: 1fr; }
+  .today-grid, .person-grid, .progress-grid { grid-template-columns: 1fr; }
+  .kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .viz-plot { flex: none; height: 220px; }
 }
 
 @media (max-width: 960px), (max-height: 600px) {
@@ -497,7 +564,7 @@ a.owner:hover { color: var(--tertiary); }
   .card { padding: var(--space-md); }
   .plan-item { gap: 10px; }
   .plan-time { font-size: 13px; }
-  .team-grid { grid-template-columns: 1fr; }
+  .team-grid, .kpi-row { grid-template-columns: 1fr; }
   .work-table .col-owner, .work-table .col-due, .work-table .col-eng { display: none; }
 }
 

@@ -67,6 +67,28 @@ const TODAY_PLAN = [
     note: "10 minutes before you log off" },
 ];
 
+/* Sample history for the Progress charts: the last six full weeks, oldest
+   first. Each list has one number per week, in the same order as "weeks".
+   team:      per person, how many commitments were due that week and how
+              many were delivered on time
+   lead:      the step-ins the lead planned and did each week
+   flagged:   work the app flagged as at risk that week, split into
+              "caughtEarly" (delivered on time after a step-in) and
+              "slipped" (delivered late anyway) */
+const HISTORY = {
+  weeks: ["5 Oct", "12 Oct", "19 Oct", "26 Oct", "2 Nov", "9 Nov"],
+  team: {
+    Priya:  { due: [5, 4, 6, 5, 6, 5], onTime: [5, 4, 5, 4, 4, 3] },
+    Marcus: { due: [4, 5, 4, 6, 5, 7], onTime: [3, 4, 4, 5, 4, 6] },
+  },
+  lead: { planned: [3, 4, 3, 5, 4, 6], done: [3, 3, 3, 4, 4, 5] },
+  flagged: { caughtEarly: [1, 2, 1, 2, 2, 3], slipped: [1, 1, 0, 1, 1, 1] },
+};
+
+/* Chart colors, one per person (from the validated data-viz palette:
+   blue, then orange). Add the next slot for a third person. */
+const PERSON_COLOR = { Priya: "#2a78d6", Marcus: "#eb6834" };
+
 /* Client engagements. "dot" picks the color dot ("northwind"
    or "harbor", defined in styles.css). */
 const ENGAGEMENTS = [

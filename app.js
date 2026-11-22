@@ -20,6 +20,7 @@ const ICONS = {
   check: '<path d="M20 6 9 17l-5-5"/>',
   x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
   arrowRight: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  chart: '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
 };
 
 function icon(name) {
@@ -195,6 +196,14 @@ function renderTeam() {
           <div><span class="fact-num">${mine.filter(dueThisWeek).length}</span><span class="meta">due this week</span></div>
           <div><span class="fact-num">${attention.length}</span><span class="meta">need you</span></div>
         </div>
+        ${HISTORY.team[p.id] ? (() => {
+          const s = onTimeSeries(p.id), last = s.length - 1;
+          return `<div class="member-trend">
+            <div><div class="kpi-label">On time, last week</div><div class="trend-value">${s[last]}%</div></div>
+            ${Viz.spark(s, { color: colorOf(p.id) })}
+            <div class="trend-note">${delta(s[last], s[last - 1])}<div class="meta">${s[0]}% six weeks ago</div></div>
+          </div>`;
+        })() : ""}
         <p class="member-note">${escapeHtml(p.note)}</p>
         <div class="member-section">
           <h3 class="part-label">Step in today</h3>
@@ -209,6 +218,88 @@ function renderTeam() {
         <span class="member-open">Open details ${icon("arrowRight")}</span>
       </a>`;
   }).join("");
+}
+
+/* ---------- History helpers (sample data in data.js) ---------- */
+
+const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+const onTimeSeries = (id) => {
+  const h = HISTORY.team[id];
+  return h ? h.onTime.map((v, i) => pct(v, h.due[i])) : [];
+};
+const teamOnTime = (i) => {
+  const ids = Object.keys(HISTORY.team);
+  return pct(ids.reduce((a, id) => a + HISTORY.team[id].onTime[i], 0), ids.reduce((a, id) => a + HISTORY.team[id].due[i], 0));
+};
+const colorOf = (id) => PERSON_COLOR[id] || "#2a78d6";
+
+/* A change in words, colored only when it is good or bad news.
+   Always an arrow and words too, never color alone. */
+function delta(now, before, unit = " pts") {
+  const d = now - before;
+  if (!d) return `<span class="delta">No change vs week before</span>`;
+  const up = d > 0;
+  return `<span class="delta ${up ? "good" : "bad"}">${up ? "▲" : "▼"} ${Math.abs(d)}${unit} vs week before</span>`;
+}
+
+/* ---------- Page: Progress ---------- */
+
+function renderProgress() {
+  const W = HISTORY.weeks, last = W.length - 1;
+
+  // You: today's plan (live: follows the ticks on Top priorities)
+  const doneToday = TODAY_PLAN.filter((p) => state.done.has(p.id)).length;
+  const stepsToday = TODAY_PLAN.filter((p) => p.commitment);
+  const stepsDone = stepsToday.filter((p) => state.done.has(p.id)).length;
+  const L = HISTORY.lead;
+  const leadRate = L.done.map((d, i) => pct(d, L.planned[i]));
+  const F = HISTORY.flagged;
+  const caught = F.caughtEarly.reduce((a, b) => a + b, 0), slipped = F.slipped.reduce((a, b) => a + b, 0);
+  const caughtRate = F.caughtEarly.map((c, i) => pct(c, c + F.slipped[i]));
+  const teamRate = W.map((_, i) => teamOnTime(i));
+  const teamDueLast = Object.values(HISTORY.team).reduce((a, h) => a + h.due[last], 0);
+  const teamOnLast = Object.values(HISTORY.team).reduce((a, h) => a + h.onTime[last], 0);
+
+  const meter = (a, b) => `<div class="meter" role="img" aria-label="${a} of ${b}"><span style="width:${pct(a, b)}%"></span></div>`;
+  $("kpis").innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">You · Today’s plan</div>
+      <div class="kpi-value">${doneToday} <span class="kpi-of">of ${TODAY_PLAN.length} done</span></div>
+      ${meter(doneToday, TODAY_PLAN.length)}
+      <div class="meta">${stepsDone} of ${stepsToday.length} step-ins done</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">You · Step-ins last week</div>
+      <div class="kpi-row-inner"><div class="kpi-value">${L.done[last]} <span class="kpi-of">of ${L.planned[last]}</span></div>${Viz.spark(leadRate)}</div>
+      ${delta(leadRate[last], leadRate[last - 1])}
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Team · On time last week</div>
+      <div class="kpi-row-inner"><div class="kpi-value">${teamRate[last]}%</div>${Viz.spark(teamRate)}</div>
+      <div class="meta">${teamOnLast} of ${teamDueLast} commitments · ${delta(teamRate[last], teamRate[last - 1])}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Team · Flagged work caught early</div>
+      <div class="kpi-row-inner"><div class="kpi-value">${caught} <span class="kpi-of">of ${caught + slipped}</span></div>${Viz.spark(caughtRate)}</div>
+      <div class="meta">Over six weeks · ${slipped} slipped anyway</div>
+    </div>`;
+
+  Viz.line($("chart-ontime"), {
+    labels: W, label: "On-time delivery by person, last six weeks",
+    series: TEAM.filter((p) => HISTORY.team[p.id]).map((p) => ({ name: p.id, color: colorOf(p.id), values: onTimeSeries(p.id) })),
+  });
+  Viz.columns($("chart-stepins"), {
+    labels: W, label: "Step-ins done out of planned, last six weeks",
+    fill: { name: "Done", color: "#2a78d6", values: L.done },
+    track: { name: "Planned", color: "#cde2fb", values: L.planned },
+  });
+  Viz.columns($("chart-flagged"), {
+    labels: W, label: "Flagged work caught early or slipped, last six weeks",
+    stacked: [
+      { name: "Caught early", color: "#2a78d6", values: F.caughtEarly },
+      { name: "Slipped", color: "#B8BDC5", values: F.slipped },
+    ],
+  });
 }
 
 /* ---------- Page: one team member ---------- */
@@ -242,16 +333,19 @@ function renderPerson() {
       </div>
     </li>`).join("");
 
-  $("person-engagements").innerHTML = engagements.map((name) => {
-    const items = mine.filter((c) => c.engagement === name);
-    const attention = items.filter(needsYou).length;
-    return `
-      <div class="eng-block">
-        <div class="eng-name">${dot(name)} ${escapeHtml(name)}</div>
-        <div class="meta">${escapeHtml(engagement(name).program)}</div>
-        <p class="eng-line">${plural(items.length, "commitment")} · ${attention ? `${attention} need${attention === 1 ? "s" : ""} you` : "all on track"}</p>
-      </div>`;
-  }).join("");
+  const series = onTimeSeries(p.id);
+  if (series.length) {
+    const h = HISTORY.team[p.id], last = series.length - 1;
+    $("person-chart-sub").innerHTML =
+      `Last week ${series[last]}% (${h.onTime[last]} of ${h.due[last]}) · ${delta(series[last], series[last - 1])}`;
+    Viz.line($("person-chart"), {
+      labels: HISTORY.weeks, label: `${p.fullName}: on-time delivery, last six weeks`,
+      series: [{ name: p.id, color: colorOf(p.id), values: series }],
+    });
+  } else {
+    $("person-chart-sub").textContent = "";
+    $("person-chart").innerHTML = `<p class="meta">No history yet for ${escapeHtml(p.fullName)}.</p>`;
+  }
 }
 
 /* ---------- Page: All commitments ---------- */
@@ -342,15 +436,16 @@ function closeSheet() {
 
 /* ---------- Pages and navigation ---------- */
 
-const PAGE_TITLE = { today: "Top priorities", team: "Team", commitments: "All commitments" };
+const PAGE_TITLE = { today: "Top priorities", team: "Team", progress: "Progress", commitments: "All commitments" };
 
 function readRoute() {
   const [page, id] = location.hash.replace(/^#\/?/, "").split("/");
-  state.page = ["today", "team", "commitments"].includes(page) ? page : "today";
+  state.page = Object.keys(PAGE_TITLE).includes(page) ? page : "today";
   state.personId = state.page === "team" && id ? decodeURIComponent(id) : null;
 }
 
 function render() {
+  Viz.hideTip();
   const pageId = state.personId ? "person" : state.page;
   document.querySelectorAll(".page").forEach((el) => { el.hidden = el.id !== `page-${pageId}`; });
   document.querySelectorAll(".nav-item[data-page]").forEach((a) =>
@@ -361,6 +456,7 @@ function render() {
   if (pageId === "today") renderToday();
   if (pageId === "team") renderTeam();
   if (pageId === "person") renderPerson();
+  if (pageId === "progress") renderProgress();
   if (pageId === "commitments") renderTable();
   if (pageId !== "person") document.title = `Ahead — ${PAGE_TITLE[pageId]}`;
   renderSheet();

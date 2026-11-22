@@ -122,8 +122,8 @@ now, and when should I step in?* Everything else is below it or one click away.
 
 Guiding principles:
 
-- **Pages, not a long scroll.** The app has four pages: Top priorities, Team,
-  one page per team member, and All commitments. Each page fills the window
+- **Pages, not a long scroll.** The app has five pages: Top priorities, Team,
+  one page per team member, Progress, and All commitments. Each page fills the window
   and fits without scrolling on a laptop (1366×768 and up).
 - **Right now first.** On Top priorities, the largest thing on the screen is
   the current part of the day ("This morning"), with its unfinished items in
@@ -140,6 +140,10 @@ Guiding principles:
   panel and on the team member's page.
 - **Calm by default.** Ink on white and grey. Indigo means "act here". Status
   colors appear only in the All commitments table.
+- **Progress is shown as trends, kindly.** Charts show how the lead and each
+  analyst are doing over the last six weeks (on time, step-ins, flagged work
+  caught early). They describe the work, not grade the person: no scores,
+  rankings or red/green judgements on people.
 
 ## Colors
 
@@ -156,6 +160,20 @@ The palette is light, neutral and quiet, with one action color.
   full commitments table, always with a word.
 - **Engagement dots:** an 8px dot that tells engagements apart, used only in
   the side panel.
+
+### Chart colors
+
+Charts follow the data-viz palette, checked with its colorblind-safety
+validator (all pairs pass on the white card surface):
+
+- **One color per person, fixed:** Priya blue `#2a78d6`, Marcus orange
+  `#eb6834`. A third person takes the next slot (aqua `#1baf7a`). Colors follow
+  the person on every chart, never their rank.
+- **One series = blue `#2a78d6`.** A "planned" track behind it is a lighter
+  step of the same blue (`#cde2fb`); "slipped" is a neutral grey (`#B8BDC5`).
+- **Change words:** "▲ 2 pts vs week before" in success green, "▼" in danger red,
+  always with the arrow and words.
+- Chart text is always ink (primary, secondary or muted), never the series color.
 
 ## Typography
 
@@ -182,6 +200,10 @@ Avoid uppercase labels and monospace text. Both make the page feel busier.
 - **Team:** one card per person, side by side, each linking to their page.
 - **Team member:** two columns (3:2). Left: "Step in today" and "By
   engagement". Right: all of their commitments.
+- **Progress:** four headline tiles (you: today's plan, step-ins last week;
+  team: on time last week, flagged work caught early), then three charts in a
+  row: on time by person (lines), your step-ins (done over planned), and
+  flagged work (caught early vs slipped).
 - **All commitments:** filters and a one-line-per-row table.
 - If content is longer than the window, it scrolls inside its card, never the
   page. Below 960px wide or 600px tall, cards stack and the page scrolls.
@@ -218,6 +240,17 @@ row in the card has a 3px indigo edge on the left.
 - **Team member page:** back link, name, one summary line; "Step in today"
   rows (same as plan rows); one small box per engagement with counts; and the
   full commitments list with status in words and due date.
+- **Headline tile:** a label ("You · Step-ins last week"), the number (28px),
+  an optional sparkline (grey line, the latest point in the accent) and one
+  line of change or context.
+- **Line chart:** 2px lines, 8px end dots with a white ring, the name and
+  latest value written at the end of each line, hairline grid at 0/50/100%,
+  a legend under the chart for two or more people.
+- **Column chart:** columns at most 24px wide with 4px rounded tops, a 2px
+  white gap between stacked parts, the latest value on top of the last column
+  only.
+- **Every chart:** a hover and keyboard tooltip (arrow keys step through
+  weeks), and a "Show as table" link under it with every value.
 - **Side panel:** engagement, title, a fact grid (owner links to their page,
   due, status in words, progress), a neutral "Why now" box, the original quote
   with its source, and where it sits on today's plan, with the one primary

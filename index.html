@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="styles.css?v=6">
+  <link rel="stylesheet" href="styles.css?v=7">
 </head>
 <body>
   <div class="app">
@@ -28,6 +28,7 @@
         <a class="nav-item" href="#/today" data-page="today"><span data-icon="sun"></span>Top priorities</a>
         <a class="nav-item" href="#/team" data-page="team"><span data-icon="users"></span>Team</a>
         <div class="nav-people" id="nav-people"></div>
+        <a class="nav-item" href="#/progress" data-page="progress"><span data-icon="chart"></span>Progress</a>
         <a class="nav-item" href="#/commitments" data-page="commitments"><span data-icon="list"></span>All commitments</a>
       </nav>
 
@@ -94,13 +95,42 @@
               <ul class="plan-list" id="person-stepins"></ul>
             </div>
             <div class="card fill">
-              <h2 class="card-title">By engagement</h2>
-              <div class="eng-grid" id="person-engagements"></div>
+              <div class="card-head-row">
+                <h2 class="card-title" id="person-chart-title">On time, last 6 weeks</h2>
+                <span class="meta" id="person-chart-sub"></span>
+              </div>
+              <div class="viz" id="person-chart"></div>
             </div>
           </div>
           <div class="card fill">
             <h2 class="card-title">Commitments</h2>
             <ul class="commit-list scroll" id="person-commitments"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Progress: how you and your team are doing -->
+      <section class="page" id="page-progress" aria-labelledby="progress-heading" hidden>
+        <header class="page-head">
+          <h1 id="progress-heading">Progress</h1>
+          <p class="page-sub">How you and your team are doing. Weekly charts use sample history for the last six full weeks.</p>
+        </header>
+        <div class="kpi-row" id="kpis"></div>
+        <div class="page-grid progress-grid">
+          <div class="card fill">
+            <h2 class="card-title">On time, by person</h2>
+            <p class="meta">Share of each person’s commitments delivered on time</p>
+            <div class="viz" id="chart-ontime"></div>
+          </div>
+          <div class="card fill">
+            <h2 class="card-title">Your step-ins</h2>
+            <p class="meta">Done, out of the ones you planned</p>
+            <div class="viz" id="chart-stepins"></div>
+          </div>
+          <div class="card fill">
+            <h2 class="card-title">Flagged work</h2>
+            <p class="meta">Caught early after a step-in, or slipped anyway</p>
+            <div class="viz" id="chart-flagged"></div>
           </div>
         </div>
       </section>
@@ -148,7 +178,8 @@
   <div class="sheet-overlay" id="sheet-overlay" hidden></div>
   <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden></div>
 
-  <script src="data.js?v=6"></script>
-  <script src="app.js?v=6"></script>
+  <script src="data.js?v=7"></script>
+  <script src="charts.js?v=7"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>
