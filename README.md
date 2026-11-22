@@ -1,6 +1,6 @@
 # Ahead — Early Signal Compass
 
-Interview prototype: a team lead's day plan, in four pages. **Top priorities** shows what's left right now ("This morning"), with moments to step in on an analyst's work marked "Step in", plus later today. **Team** has a card per person, and each person has their own details page. **Progress** has charts on how you and each person are doing over the last six weeks. **All commitments** lists everything with filters. This is Phase 1 of the roadmap.
+Interview prototype: a team lead's day plan, in five pages. **Top priorities** shows what's left right now ("This morning"), with moments to step in on an analyst's work marked "Step in", plus later today. **Team** has a card per person, and each person has their own details page. **Progress** has charts on how you and each person are doing over the last six weeks. **All commitments** lists everything with filters. This is Phase 1 of the roadmap.
 
 **Live site:** https://ca-scotti.github.io/early-signal-compass/
 
