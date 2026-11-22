@@ -8,7 +8,13 @@
      #/today              Top priorities
      #/team               Your team
      #/team/Priya         One team member (the id from TEAM in data.js)
-     #/commitments        All commitments
+     #/progress           Progress (lead only)
+     #/commitments        All commitments (an analyst sees only their own)
+     #/profile            Profile: fake connections, imports, team access
+
+   Demo "view as": once Alex connects Priya or Marcus on the Profile page,
+   "View as" shows the app as they would see it: My day and My commitments
+   only, never the team page, progress charts or anyone else's work.
    ========================================================= */
 
 /* ---------- Icons (from the Lucide icon set) ---------- */
@@ -407,7 +413,7 @@ function renderPerson() {
     <li class="commit-row ${state.selectedId === c.id ? "selected" : ""}">
       <div>
         <button class="plan-title" data-open="${c.id}">${escapeHtml(c.title)}</button>
-        <div class="meta">${dot(c.engagement)} ${escapeHtml(c.engagement)} · ${escapeHtml(c.progress)}</div>
+        <div class="meta">${dot(c.engagement)} ${escapeHtml(c.engagement)} · ${escapeHtml(c.progress)}${ownerDone(c.id) ? ` · <strong>Marked done by ${escapeHtml(c.owner)}</strong>` : ""}${c.found ? ` <span class="new-label">New</span>` : ""}</div>
       </div>
       <div class="commit-side">
         <span class="${needsYou(c) ? "status-strong" : "meta"}">${STATUS_LABEL[c.status]}</span>
@@ -439,20 +445,27 @@ function renderTable() {
   $("filter-status").value = status;
   $("filter-reset").hidden = eng === "all" && owner === "all" && status === "all";
 
-  const rows = COMMITMENTS
-    .filter((c) => (eng === "all" || c.engagement === eng) && (owner === "all" || c.owner === owner) && (status === "all" || c.status === status))
+  // An analyst only ever sees their own commitments
+  const me = viewer();
+  const pool = me === "lead" ? COMMITMENTS : COMMITMENTS.filter((c) => c.owner === me);
+  const rows = pool
+    .filter((c) => (eng === "all" || c.engagement === eng) && (me !== "lead" || owner === "all" || c.owner === owner) && (status === "all" || c.status === status))
     .sort((a, b) => a.daysUntilDue - b.daysUntilDue);
 
-  $("table-count").textContent = `${rows.length} of ${COMMITMENTS.length}`;
+  const marks = (c) =>
+    (planFor(c.id) && state.done.has(planFor(c.id).id) && me === "lead" ? `<span class="planned-mark">· Stepped in today</span>` : "") +
+    (ownerDone(c.id) ? `<span class="planned-mark">· Marked done${me === "lead" ? ` by ${escapeHtml(c.owner)}` : ""}</span>` : "") +
+    (c.found ? `<span class="new-label">New</span>` : "");
+  $("table-count").textContent = `${rows.length} of ${pool.length}`;
   $("work-table-body").innerHTML = rows.length === 0
     ? `<tr><td colspan="5" class="empty-row">No commitments match these filters.</td></tr>`
     : rows.map((c) => `
       <tr data-open="${c.id}">
-        <td class="title-cell">${escapeHtml(c.title)}${planFor(c.id) && state.done.has(planFor(c.id).id) ? `<span class="planned-mark">· Stepped in today</span>` : ""}</td>
+        <td class="title-cell">${escapeHtml(c.title)}${marks(c)}</td>
         <td class="col-eng"><span class="eng-cell">${dot(c.engagement)}${escapeHtml(c.engagement)}</span></td>
         <td class="col-owner"><a class="owner" href="#/team/${encodeURIComponent(c.owner)}">${avatar(c.owner, "small")}${escapeHtml(c.owner)}</a></td>
         <td class="col-due">${escapeHtml(c.due)}</td>
-        <td>${badge(c.status)}</td>
+        <td class="col-status">${badge(c.status)}</td>
       </tr>`).join("");
 }
 
@@ -467,6 +480,30 @@ function renderSheet() {
   const plan = planFor(c.id);
   const checkedIn = plan && state.done.has(plan.id);
   const program = engagement(c.engagement).program;
+
+  // An analyst sees their own commitment and its source, never the lead's
+  // "why now" notes or plan.
+  if (!isLead()) {
+    const done = ownerDone(c.id);
+    sheet.innerHTML = `
+      <button class="sheet-close" data-close aria-label="Close">${icon("x")}</button>
+      <div class="sheet-eyebrow meta">${escapeHtml(c.engagement)}${program ? ` · ${escapeHtml(program)}` : ""}</div>
+      <h2 class="sheet-title" id="sheet-title">${escapeHtml(c.title)}</h2>
+      <div class="facts">
+        <div><div class="fact-label">Due</div><div class="fact-value">${escapeHtml(c.due)}</div><div class="meta">${dueLabel(c)}</div></div>
+        <div><div class="fact-label">Latest progress</div><div class="fact-value">${escapeHtml(c.progress || "")}</div></div>
+      </div>
+      <div class="sheet-section">
+        <h3>Where this came from</h3>
+        <blockquote class="quote">“${escapeHtml(c.excerpt)}”</blockquote>
+        <div class="quote-source meta">${SOURCE_WORD[c.sourceType] || "Note"} · ${escapeHtml(c.source)}</div>
+      </div>
+      <div class="sheet-section">
+        <button class="btn btn-primary" data-todo-toggle="${c.id}">${done ? "Mark not done" : `${icon("check")}Mark done`}</button>
+        ${done ? `<p class="confirmation">Marked done. ${escapeHtml(SETTINGS.leadName)} sees it in All commitments.</p>` : ""}
+      </div>`;
+    return;
+  }
 
   sheet.innerHTML = `
     <button class="sheet-close" data-close aria-label="Close">${icon("x")}</button>
@@ -516,31 +553,220 @@ function closeSheet() {
   document.querySelector(`button[data-open="${id}"]`)?.focus({ preventScroll: true });
 }
 
+/* =========================================================
+   Demo: fake connections, imports and "view as"
+   Nothing is really connected. What you click is saved in this
+   browser (localStorage) so it survives a refresh; "Reset demo"
+   on the Profile page clears it.
+   ========================================================= */
+
+const DEMO_KEY = "ahead-demo-v1";
+const demo = (() => {
+  const blank = { connected: {}, scanned: {}, accepted: [], dismissed: [], invited: {}, viewAs: "lead", ownerDone: [] };
+  try { return { ...blank, ...JSON.parse(localStorage.getItem(DEMO_KEY) || "{}") }; } catch { return blank; }
+})();
+function saveDemo() {
+  try { localStorage.setItem(DEMO_KEY, JSON.stringify(demo)); } catch { /* storage blocked: the demo still works until reload */ }
+}
+const busy = { connecting: new Set(), scanning: false };
+
+/* Who is looking: "lead" (Alex) or a team member's id, if Alex has connected them. */
+const viewer = () =>
+  demo.viewAs !== "lead" && demo.invited[demo.viewAs] && TEAM.some((p) => p.id === demo.viewAs) ? demo.viewAs : "lead";
+const isLead = () => viewer() === "lead";
+const firstName = (id) => (id === "lead" ? SETTINGS.leadName : person(id).fullName.split(" ")[0]);
+const foundById = (id) => FOUND_IN_SCAN.find((f) => String(f.id) === String(id));
+const ownerDone = (id) => demo.ownerDone.includes(id);
+
+/* Add an accepted item to the app's data, once. */
+function applyFound(f) {
+  if (f.kind === "task") {
+    if (!TODAY_PLAN.some((p) => p.id === f.id))
+      TODAY_PLAN.push({ id: f.id, part: f.part, by: f.by, done: false, title: f.title, note: `Found in ${f.source}`, found: true });
+    return;
+  }
+  if (!byId(f.id)) {
+    const { kind, stepIn, ...c } = f;
+    COMMITMENTS.push({ ...c, found: true });
+    if (stepIn && !TODAY_PLAN.some((p) => p.id === `s${f.id}`))
+      TODAY_PLAN.push({ id: `s${f.id}`, part: stepIn.part, by: stepIn.by, done: false, commitment: f.id, title: stepIn.title });
+  }
+}
+demo.accepted.forEach((id) => { const f = foundById(id); if (f) applyFound(f); });
+
+/* ---------- Page: Profile (connections, imports, team access) ---------- */
+
+function foundRow(f, me) {
+  const id = String(f.id);
+  const accepted = demo.accepted.includes(id), dismissed = demo.dismissed.includes(id);
+  const who = f.kind === "task" ? (me === "lead" ? "Your task" : "Task") : (f.owner === me ? "For you" : `For ${f.owner}`);
+  const when = f.kind === "task" ? `Today by ${clock(f.by)}` : `${f.engagement} · due ${f.due}`;
+  const extra = f.stepIn && me === "lead" ? `<p class="found-step">Adds a step-in to your plan: ${escapeHtml(f.stepIn.title)} · ${clock(f.stepIn.by)}</p>` : "";
+  return `
+    <li class="found-row ${accepted ? "is-accepted" : ""} ${dismissed ? "is-dismissed" : ""}">
+      <div class="found-main">
+        <div class="found-who meta">${escapeHtml(who)} · ${SOURCE_WORD[f.sourceType] || "Note"}</div>
+        <div class="found-title">${escapeHtml(f.title)}</div>
+        <div class="meta">${escapeHtml(when)}</div>
+        <blockquote class="found-quote">“${escapeHtml(f.excerpt)}”<span class="meta"> · ${escapeHtml(f.source)}</span></blockquote>
+        ${extra}
+      </div>
+      <div class="found-actions">
+        ${accepted ? `<span class="connected">${icon("check")}Added</span>`
+          : dismissed ? `<span class="meta">Dismissed</span>`
+          : `<button class="btn btn-primary btn-sm" data-accept="${id}">${me === "lead" ? "Add" : "Confirm"}</button>
+             <button class="btn-text" data-dismiss="${id}">Dismiss</button>`}
+      </div>
+    </li>`;
+}
+
+function renderProfile() {
+  const me = viewer(), lead = me === "lead", p = lead ? null : person(me);
+  document.title = "Ahead — Profile";
+  $("profile-avatar").textContent = lead ? SETTINGS.leadInitials : p.initials;
+  $("profile-heading").textContent = lead ? SETTINGS.leadFullName : p.fullName;
+  $("profile-sub").textContent = lead
+    ? `${SETTINGS.leadRole} · ${SETTINGS.firmName}`
+    : `${p.role} · ${SETTINGS.firmName} · Connected by ${SETTINGS.leadFullName}`;
+
+  // Sources
+  const conn = demo.connected[me] || {};
+  $("source-list").innerHTML = SOURCES.map((s) => {
+    const on = conn[s.id], wait = busy.connecting.has(s.id);
+    return `
+      <li class="source-row">
+        <div><div class="source-name">${escapeHtml(s.name)}</div><div class="meta">${escapeHtml(s.detail)}</div></div>
+        ${on ? `<span class="connected">${icon("check")}Connected</span>`
+          : `<button class="btn btn-secondary btn-sm" data-connect="${s.id}" ${wait ? "disabled" : ""}>${wait ? "Connecting…" : "Connect"}</button>`}
+      </li>`;
+  }).join("");
+
+  // What the scan found (an analyst only sees items about their own work)
+  const anyOn = Object.values(conn).some(Boolean);
+  const items = FOUND_IN_SCAN.filter((f) => lead || (f.kind === "commitment" && f.owner === me));
+  const pending = items.filter((f) => !demo.accepted.includes(String(f.id)) && !demo.dismissed.includes(String(f.id)));
+  $("found-actions").innerHTML = demo.scanned[me] && pending.length
+    ? `<button class="btn-text" data-accept-all>${lead ? "Add all" : "Confirm all"} (${pending.length})</button>` : "";
+  $("found-list").innerHTML =
+    !anyOn ? `<div class="found-empty"><p>Connect a source to see what Ahead picks up.</p><p class="meta">It looks for promises with a date: “Priya will send it by Friday.”</p></div>`
+    : busy.scanning ? `<div class="found-empty"><p>Reading the last 7 days of email, meetings and chats…</p><div class="scan-bar"><span></span></div></div>`
+    : !demo.scanned[me] ? `<div class="found-empty"><p>Ready to look for commitments.</p><button class="btn btn-primary" data-scan>Scan now</button></div>`
+    : `<p class="meta found-summary">Found ${plural(items.length, "commitment")} in the last 7 days. ${lead ? "Nothing is added until you say so." : "Confirm the ones that are right; Alex sees what you confirm."}</p>
+       <ul class="found-items">${items.map((f) => foundRow(f, me)).join("")}</ul>`;
+
+  // Team access (lead) or "what you can see" (analyst)
+  $("access-title").textContent = lead ? "Team access" : "What you can see";
+  $("access-body").innerHTML = lead ? `
+      <p class="meta">Give each analyst their own view. They see only their own commitments, projects and check-ins with you. Never the team page, the progress charts or anyone else’s work.</p>
+      <ul class="access-list">${TEAM.map((t) => `
+        <li class="access-row">
+          ${avatar(t.id)}
+          <div class="access-text"><div class="person-name">${escapeHtml(t.fullName)}</div>
+            <div class="meta">${demo.invited[t.id] ? "Connected · sees only their own work" : "Not connected yet"}</div></div>
+          ${demo.invited[t.id]
+            ? `<button class="btn btn-secondary btn-sm" data-view-as="${t.id}">View as ${escapeHtml(firstName(t.id))}</button>`
+            : `<button class="btn btn-primary btn-sm" data-invite="${t.id}">Connect</button>`}
+        </li>`).join("")}</ul>`
+    : `
+      <ul class="can-see">
+        <li>${icon("check")}Your own commitments and projects</li>
+        <li>${icon("check")}When ${escapeHtml(SETTINGS.leadName)} plans to check in with you</li>
+        <li class="cannot">${icon("x")}Other people’s work, the team page or progress charts</li>
+      </ul>
+      <button class="btn btn-secondary btn-sm" data-back-to-lead>Back to ${escapeHtml(SETTINGS.leadName)}’s view</button>`;
+}
+
+/* ---------- Page: an analyst's own day (only their work) ---------- */
+
+function renderMy() {
+  const me = viewer(), p = person(me);
+  const mine = COMMITMENTS.filter((c) => c.owner === me).sort((a, b) => a.daysUntilDue - b.daysUntilDue);
+  const open = mine.filter((c) => !ownerDone(c.id)), finished = mine.filter((c) => ownerDone(c.id));
+  document.title = `Ahead — My day`;
+  $("my-heading").textContent = `Good morning, ${firstName(me)}`;
+  $("my-sub").textContent = `${SETTINGS.today}, ${clock(SETTINGS.now)} · ${plural(open.length, "to-do")} open · ${open.filter(dueThisWeek).length} due this week`;
+
+  const todo = (c) => {
+    const done = ownerDone(c.id);
+    return `
+      <li class="commit-row todo-row ${done ? "is-done" : ""} ${state.selectedId === c.id ? "selected" : ""}">
+        <input type="checkbox" class="plan-check todo-check" data-todo="${c.id}" ${done ? "checked" : ""} aria-label="Mark done: ${escapeHtml(c.title)}">
+        <div class="todo-body">
+          <button class="plan-title" data-open="${c.id}">${escapeHtml(c.title)}</button>
+          <div class="meta">${escapeHtml(c.engagement)} · ${escapeHtml(c.progress || "")}${c.found ? ` · <span class="new-label">New</span> from ${escapeHtml(c.source)}` : ""}</div>
+        </div>
+        <div class="commit-side">
+          <span class="${!done && c.daysUntilDue <= 1 ? "status-strong" : "meta"}">${done ? "Done" : dueLabel(c)}</span>
+          <span class="meta">${escapeHtml(c.due)}</span>
+        </div>
+      </li>`;
+  };
+  $("my-todos").innerHTML = (open.map(todo).join("") || `<li class="empty meta">Nothing open. Nice.</li>`) + finished.map(todo).join("");
+
+  // When the lead plans to check in (no reasons: those are the lead's notes)
+  const checks = TODAY_PLAN.filter((t) => t.commitment && byId(t.commitment)?.owner === me).sort(byTime);
+  const lead = SETTINGS.leadName;
+  $("my-checkins-title").textContent = `Check-ins with ${lead} today`;
+  $("my-checkins").innerHTML = checks.length ? checks.map((t) => {
+    const title = t.title.includes(`with ${me}`) ? t.title.replace(`with ${me}`, `with ${lead}`) : `${lead}: ${t.title}`;
+    return `<li class="${state.done.has(t.id) ? "is-done" : ""}"><span>${escapeHtml(title)}</span><span class="meta">${clock(t.by)}</span></li>`;
+  }).join("") : `<li><span class="meta">No check-ins planned today.</span></li>`;
+
+  // Their projects
+  const projects = [...new Set(mine.map((c) => c.engagement))];
+  $("my-projects").innerHTML = projects.map((name) => {
+    const items = open.filter((c) => c.engagement === name).sort((a, b) => a.daysUntilDue - b.daysUntilDue);
+    return `
+      <div class="project-row">
+        <div class="eng-name">${escapeHtml(name)}</div>
+        <div class="meta">${escapeHtml(engagement(name).program)}</div>
+        <p class="eng-line">${plural(items.length, "open to-do")}${items[0] ? ` · next due ${escapeHtml(items[0].due)}` : ""}</p>
+      </div>`;
+  }).join("");
+}
+
 /* ---------- Pages and navigation ---------- */
 
-const PAGE_TITLE = { today: "Top priorities", team: "Team", progress: "Progress", commitments: "All commitments" };
+const PAGE_TITLE = { today: "Top priorities", team: "Team", progress: "Progress", commitments: "All commitments", profile: "Profile" };
+const LEAD_ONLY = ["team", "progress"];
 
 function readRoute() {
   const [page, id] = location.hash.replace(/^#\/?/, "").split("/");
   state.page = Object.keys(PAGE_TITLE).includes(page) ? page : "today";
+  if (!isLead() && LEAD_ONLY.includes(state.page)) { state.page = "today"; history.replaceState(null, "", "#/today"); }
   state.personId = state.page === "team" && id ? decodeURIComponent(id) : null;
 }
 
 function render() {
   Viz.hideTip();
-  const pageId = state.personId ? "person" : state.page;
+  const me = viewer(), lead = me === "lead";
+  let pageId = state.personId ? "person" : state.page;
+  if (!lead && pageId === "today") pageId = "my";
+
+  document.body.classList.toggle("as-analyst", !lead);
   document.querySelectorAll(".page").forEach((el) => { el.hidden = el.id !== `page-${pageId}`; });
+  document.querySelectorAll("[data-for]").forEach((el) => { el.hidden = el.dataset.for !== (lead ? "lead" : "analyst"); });
   document.querySelectorAll(".nav-item[data-page]").forEach((a) =>
     a.classList.toggle("active", a.dataset.page === state.page && !state.personId));
   document.querySelectorAll(".nav-person").forEach((a) =>
     a.classList.toggle("active", a.dataset.person === state.personId));
 
+  // Who is signed in (sidebar), and the "viewing as" banner
+  $("me-initials").textContent = lead ? SETTINGS.leadInitials : person(me).initials;
+  $("me-name").textContent = lead ? SETTINGS.leadFullName : person(me).fullName;
+  $("me-role").textContent = lead ? SETTINGS.leadRole : person(me).role;
+  $("user-profile").classList.toggle("active", state.page === "profile");
+  $("view-as").hidden = lead;
+  if (!lead) $("view-as").innerHTML = `Demo: you’re seeing ${escapeHtml(firstName(me))}’s view. <button class="btn-text" data-back-to-lead>Back to ${escapeHtml(SETTINGS.leadName)}</button>`;
+
   if (pageId === "today") renderToday();
+  if (pageId === "my") renderMy();
   if (pageId === "team") renderTeam();
   if (pageId === "person") renderPerson();
   if (pageId === "progress") renderProgress();
   if (pageId === "commitments") renderTable();
-  if (pageId !== "person") document.title = `Ahead — ${PAGE_TITLE[pageId]}`;
+  if (pageId === "profile") renderProfile();
+  if (!["person", "my", "profile"].includes(pageId)) document.title = `Ahead — ${lead ? PAGE_TITLE[pageId] : "My commitments"}`;
   renderSheet();
 }
 
@@ -558,6 +784,56 @@ function fillStatic() {
 }
 
 /* ---------- Events ---------- */
+
+/* Demo clicks: connect, scan, add/dismiss, connect a teammate, view as */
+document.addEventListener("click", (event) => {
+  const t = event.target.closest("[data-connect], [data-scan], [data-accept], [data-dismiss], [data-accept-all], [data-invite], [data-view-as], [data-back-to-lead], [data-todo-toggle], #demo-reset");
+  if (!t) return;
+  const me = viewer();
+  if (t.dataset.connect) {
+    const id = t.dataset.connect;
+    busy.connecting.add(id); render();
+    setTimeout(() => {
+      busy.connecting.delete(id);
+      demo.connected[me] = { ...(demo.connected[me] || {}), [id]: true };
+      saveDemo(); render();
+    }, 900);
+  } else if (t.hasAttribute("data-scan")) {
+    busy.scanning = true; render();
+    setTimeout(() => { busy.scanning = false; demo.scanned[me] = true; saveDemo(); render(); }, 1600);
+  } else if (t.dataset.accept || t.hasAttribute("data-accept-all")) {
+    const ids = t.dataset.accept ? [t.dataset.accept]
+      : FOUND_IN_SCAN.filter((f) => me === "lead" || (f.kind === "commitment" && f.owner === me)).map((f) => String(f.id))
+          .filter((id) => !demo.accepted.includes(id) && !demo.dismissed.includes(id));
+    ids.forEach((id) => { demo.accepted.push(id); applyFound(foundById(id)); });
+    saveDemo(); render();
+  } else if (t.dataset.dismiss) {
+    demo.dismissed.push(t.dataset.dismiss); saveDemo(); render();
+  } else if (t.dataset.invite) {
+    demo.invited[t.dataset.invite] = true; saveDemo(); render();
+  } else if (t.dataset.viewAs) {
+    demo.viewAs = t.dataset.viewAs; state.selectedId = null; saveDemo();
+    location.hash = "#/today"; readRoute(); render();
+  } else if (t.hasAttribute("data-back-to-lead")) {
+    demo.viewAs = "lead"; state.selectedId = null; saveDemo();
+    location.hash = "#/profile"; readRoute(); render();
+  } else if (t.dataset.todoToggle) {
+    toggleOwnerDone(Number(t.dataset.todoToggle)); render();
+  } else if (t.id === "demo-reset") {
+    try { localStorage.removeItem(DEMO_KEY); } catch { /* ignore */ }
+    location.hash = "#/today"; location.reload();
+  }
+});
+
+function toggleOwnerDone(id) {
+  demo.ownerDone = ownerDone(id) ? demo.ownerDone.filter((x) => x !== id) : [...demo.ownerDone, id];
+  saveDemo();
+}
+
+document.addEventListener("change", (e) => {
+  if (!e.target.matches(".todo-check")) return;
+  toggleOwnerDone(Number(e.target.dataset.todo)); render();
+});
 
 document.addEventListener("click", (event) => {
   if (event.target.matches(".plan-check")) return;   // handled by the change listener below
@@ -577,7 +853,7 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("change", (e) => {
-  if (!e.target.matches(".plan-check")) return;
+  if (!e.target.matches(".plan-check") || e.target.matches(".todo-check")) return;
   const id = e.target.dataset.done;
   if (e.target.checked) state.done.add(id); else state.done.delete(id);
   render();

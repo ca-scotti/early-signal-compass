@@ -283,6 +283,17 @@ row in the card has a 3px indigo edge on the left.
   due, status in words, progress), a neutral "Why now" box, the original quote
   with its source, and where it sits on today's plan, with the one primary
   button "Mark done".
+- **Profile:** two columns. Left: "Connected sources" (Outlook email, Teams,
+  calendar; each a row with Connect or a green "Connected") and "Team access"
+  (each analyst with Connect, then "View as"). Right: "Picked up from your
+  email and meetings": each found item says who it's for, the source, one
+  line of the original quote and Add/Dismiss. Nothing joins the app until
+  the lead adds it. A one-line "Demo only" note sits under the page.
+- **An analyst's view (Priya, Marcus):** "My day" (their to-dos with a
+  checkbox, due label and source; "Check-ins with Alex today", times only;
+  "My projects") and "My commitments" (their rows only, no owner or status
+  column). The side panel shows the commitment and where it came from, never
+  the lead's "why now" notes. A banner in the sidebar says whose view it is.
 - **Buttons:** one primary button per view at most (in the side panel).
 
 ## Do's and Don'ts
@@ -305,6 +316,11 @@ this app answers each:
 8. **The default AI font** → Source Serif 4 + IBM Plex Sans.
 
 ### General
+
+- **Each person sees only their own work.** Analysts never see the team
+  page, the progress charts, another analyst's work or the lead's notes about
+  them. Check-ins appear to them as plain times ("15-min check-in with Alex,
+  1 pm"), without the reason.
 
 
 - **Do** lead with what's left right now, in time order.

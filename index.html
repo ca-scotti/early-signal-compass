@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
-  <link rel="stylesheet" href="styles.css?v=11">
+  <link rel="stylesheet" href="styles.css?v=12">
 </head>
 <body>
   <div class="app">
@@ -24,21 +24,27 @@
       </div>
       <div class="firm-name meta" data-text="firmName"></div>
 
+      <!-- data-for: "lead" items show for the team lead, "analyst" items for Priya/Marcus -->
       <nav class="nav">
-        <a class="nav-item" href="#/today" data-page="today"><span data-icon="sun"></span>Top priorities</a>
-        <a class="nav-item" href="#/team" data-page="team"><span data-icon="users"></span>Team</a>
-        <div class="nav-people" id="nav-people"></div>
-        <a class="nav-item" href="#/progress" data-page="progress"><span data-icon="chart"></span>Progress</a>
-        <a class="nav-item" href="#/commitments" data-page="commitments"><span data-icon="list"></span>All commitments</a>
+        <a class="nav-item" href="#/today" data-page="today" data-for="lead"><span data-icon="sun"></span>Top priorities</a>
+        <a class="nav-item" href="#/today" data-page="today" data-for="analyst"><span data-icon="sun"></span>My day</a>
+        <a class="nav-item" href="#/team" data-page="team" data-for="lead"><span data-icon="users"></span>Team</a>
+        <div class="nav-people" id="nav-people" data-for="lead"></div>
+        <a class="nav-item" href="#/progress" data-page="progress" data-for="lead"><span data-icon="chart"></span>Progress</a>
+        <a class="nav-item" href="#/commitments" data-page="commitments" data-for="lead"><span data-icon="list"></span>All commitments</a>
+        <a class="nav-item" href="#/commitments" data-page="commitments" data-for="analyst"><span data-icon="list"></span>My commitments</a>
       </nav>
 
-      <div class="user-profile">
-        <span class="avatar" data-text="leadInitials"></span>
+      <!-- Demo: shown while looking at the app as Priya or Marcus -->
+      <div class="view-as" id="view-as" hidden></div>
+
+      <a class="user-profile" href="#/profile" id="user-profile" title="Your profile and connections">
+        <span class="avatar" id="me-initials"></span>
         <div>
-          <div class="profile-name" data-text="leadFullName"></div>
-          <div class="meta" data-text="leadRole"></div>
+          <div class="profile-name" id="me-name"></div>
+          <div class="meta" id="me-role"></div>
         </div>
-      </div>
+      </a>
     </aside>
 
     <!-- ============ Pages (one shows at a time) ============ -->
@@ -60,6 +66,62 @@
         <div class="page-grid parts-grid" id="parts"></div>
         <!-- The team, in one slim row -->
         <div class="team-row" id="team-tiles" aria-label="Your team today"></div>
+      </section>
+
+      <!-- An analyst's own day (Priya or Marcus): only their work -->
+      <section class="page" id="page-my" aria-labelledby="my-heading" hidden>
+        <header class="page-head">
+          <h1 id="my-heading"></h1>
+          <p class="page-sub" id="my-sub"></p>
+        </header>
+        <div class="page-grid person-grid">
+          <div class="card fill">
+            <h2 class="card-title">My to-dos</h2>
+            <ul class="commit-list scroll" id="my-todos"></ul>
+          </div>
+          <div class="stack">
+            <div class="card">
+              <h2 class="card-title" id="my-checkins-title">Check-ins today</h2>
+              <ul class="mini-list" id="my-checkins"></ul>
+            </div>
+            <div class="card fill">
+              <h2 class="card-title">My projects</h2>
+              <div class="scroll" id="my-projects"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Profile: fake connections to email/meetings, and team access -->
+      <section class="page" id="page-profile" aria-labelledby="profile-heading" hidden>
+        <header class="page-head person-head-lg">
+          <span class="avatar large" id="profile-avatar"></span>
+          <div>
+            <h1 id="profile-heading"></h1>
+            <p class="page-sub" id="profile-sub"></p>
+          </div>
+        </header>
+        <div class="page-grid profile-grid">
+          <div class="stack">
+            <div class="card">
+              <h2 class="card-title">Connected sources</h2>
+              <p class="meta">Ahead reads these to pick up commitments with no extra effort.</p>
+              <ul class="source-list" id="source-list"></ul>
+            </div>
+            <div class="card fill" id="access-card">
+              <h2 class="card-title" id="access-title">Team access</h2>
+              <div id="access-body"></div>
+            </div>
+          </div>
+          <div class="card fill" id="found-card">
+            <div class="card-head-row">
+              <h2 class="card-title">Picked up from your email and meetings</h2>
+              <span id="found-actions"></span>
+            </div>
+            <div class="scroll" id="found-list"></div>
+          </div>
+        </div>
+        <p class="demo-note meta">Demo only: nothing is really connected, and the found items are sample data. Your clicks are saved in this browser. <button class="btn-text" id="demo-reset">Reset demo</button></p>
       </section>
 
       <!-- Team: one card per person -->
@@ -155,7 +217,7 @@
                   <th class="col-eng">Engagement</th>
                   <th class="col-owner">Owner</th>
                   <th class="col-due">Due</th>
-                  <th>Status</th>
+                  <th class="col-status">Status</th>
                 </tr>
               </thead>
               <tbody id="work-table-body"></tbody>
@@ -171,8 +233,8 @@
   <div class="sheet-overlay" id="sheet-overlay" hidden></div>
   <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden></div>
 
-  <script src="data.js?v=11"></script>
-  <script src="charts.js?v=11"></script>
-  <script src="app.js?v=11"></script>
+  <script src="data.js?v=12"></script>
+  <script src="charts.js?v=12"></script>
+  <script src="app.js?v=12"></script>
 </body>
 </html>

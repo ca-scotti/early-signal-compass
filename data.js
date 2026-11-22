@@ -28,6 +28,52 @@ const TEAM = [
     note: "Worth a priorities check-in." },
 ];
 
+/* ---------- Demo only: fake account connections (Profile page) ----------
+   Nothing is really connected. Clicking "Connect" waits a moment and then
+   shows it as connected; "Scan" then "finds" the items in FOUND_IN_SCAN. */
+const SOURCES = [
+  { id: "outlook", name: "Outlook email", detail: "Finds promises with a date in emails you send and receive" },
+  { id: "teams", name: "Teams meetings and chats", detail: "Finds who agreed to what in meetings and team chats" },
+  { id: "calendar", name: "Outlook calendar", detail: "Fits step-ins around your meetings" },
+];
+
+/* What the fake scan "finds". Accepting one adds it to the app.
+   kind: "commitment" = an analyst's work (joins All commitments, the team
+         pages and that analyst's own view); "task" = the lead's own to-do
+         (joins today's plan).
+   stepIn: optional; a step-in that also joins today's plan. */
+const FOUND_IN_SCAN = [
+  {
+    kind: "commitment", id: 101, title: "Updated data request list",
+    owner: "Marcus", engagement: "Northwind Retail", status: "on-track",
+    due: "Wed, 18 Nov", daysUntilDue: 2, source: "Mon email from the Northwind CFO", sourceType: "email",
+    excerpt: "Marcus, could you send the updated data request list by Wednesday?",
+    progress: "Not started yet",
+  },
+  {
+    kind: "commitment", id: 102, title: "Steering committee pre-read",
+    owner: "Priya", engagement: "Northwind Retail", status: "on-track",
+    due: "Thu, 19 Nov", daysUntilDue: 3, source: "Mon Teams chat", sourceType: "chat",
+    excerpt: "Priya will pull together the pre-read pack for Thursday’s steering committee.",
+    progress: "Not started yet",
+  },
+  {
+    kind: "commitment", id: 103, title: "Evidence walkthrough with Harbor IT",
+    owner: "Marcus", engagement: "Harbor Health", status: "at-risk",
+    due: "Tue, 17 Nov", daysUntilDue: 1, source: "Mon morning stand-up", sourceType: "meeting",
+    excerpt: "Marcus to walk Harbor IT through the evidence pack by Tuesday.",
+    progress: "Waiting on Harbor IT to confirm a time",
+    reason: "Due tomorrow and Harbor IT hasn’t confirmed a time yet.", since: "this morning",
+    nextStep: "Check with Marcus whether to ask the Harbor PM to book the time.",
+    stepIn: { part: "afternoon", by: "14:30", title: "Quick check with Marcus: Harbor IT walkthrough time" },
+  },
+  {
+    kind: "task", id: "t104", title: "Send the updated workplan to the partner",
+    part: "evening", by: "17:45", source: "Mon email from the engagement partner", sourceType: "email",
+    excerpt: "Alex, can you send me the updated workplan before you log off today?",
+  },
+];
+
 /* The three parts of the day on the Today page (24-hour clock). */
 const DAY_PARTS = [
   { id: "morning", name: "Morning", start: "08:00", end: "12:00" },
